@@ -2,6 +2,7 @@ import falcon
 from falcon_cors import CORS
 from models.schema import db, AdminUser
 from pony.orm import db_session
+from waitress import serve
 
 from resources.siswa import SiswaResource, SiswaWithIdResource
 from resources.auth import AdminLoginResource
@@ -19,7 +20,6 @@ app.add_route('/api/siswa/{siswa_id}', SiswaWithIdResource())
 app.add_route('/api/admin/login', AdminLoginResource())
 
 if __name__ == '__main__':
-    from wsgiref.simple_server import make_server
     from models.schema import *
 
     db.generate_mapping(create_tables=True)
@@ -29,6 +29,5 @@ if __name__ == '__main__':
             AdminUser(name="Bos Dika", email="admin@sap.com", password="password123")
             print("Akun admin default (Email: admin@sap.com, Pass: password123)")
 
-    print("Server Backend SAP berjalan di http://localhost:8000")
-    with make_server('', 8000, app) as httpd:
-        httpd.serve_forever()
+    print("Server Mini Project jalan di http://localhost:8000")
+    serve(app, host='0.0.0.0', port=8000)

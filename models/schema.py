@@ -1,8 +1,8 @@
 from pony.orm import *
 from datetime import datetime
 
-# PERUBAHANNYA DI SINI: db diciptakan langsung di schema, bukan import dari app
 db = Database()
+
 
 class AdminUser(db.Entity):
     _table_ = "admin_user"
@@ -23,6 +23,7 @@ class AdminUser(db.Entity):
             "created_date": self.created_date.strftime("%d %B %Y") if self.created_date else None
         }
 
+
 class TahunAjaran(db.Entity):
     _table_ = "tahun_ajaran"
     id = PrimaryKey(int, auto=True)
@@ -31,12 +32,14 @@ class TahunAjaran(db.Entity):
     is_active = Required(bool, default=False)
     kelas = Set('Kelas')
 
+
 class Jurusan(db.Entity):
     _table_ = "jurusan"
     id = PrimaryKey(int, auto=True)
     kode_jurusan = Required(str, unique=True)
     nama_jurusan = Required(str)
     kelas = Set('Kelas')
+
 
 class Kelas(db.Entity):
     _table_ = "kelas"
@@ -48,6 +51,7 @@ class Kelas(db.Entity):
     wali_kelas_name = Optional(str)
     siswa = Set('Siswa')
 
+
 class Siswa(db.Entity):
     _table_ = "siswa"
     id = PrimaryKey(int, auto=True)
@@ -58,6 +62,7 @@ class Siswa(db.Entity):
     status_aktif = Required(bool, default=True)
     kelas = Optional(Kelas)
     absensi = Set('Absensi')
+
 
 class Absensi(db.Entity):
     _table_ = "absensi"
