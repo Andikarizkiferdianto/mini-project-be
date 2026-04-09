@@ -1,3 +1,7 @@
 falcon
 pony
 gunicorn
+PyJWT
+bcrypt
+falcon-cors
+# pymysql   # (Uncomment kalau pakai database MySQL)
