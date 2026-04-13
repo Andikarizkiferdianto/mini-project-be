@@ -6,6 +6,7 @@ from waitress import serve
 
 from resources.siswa import SiswaResource, SiswaWithIdResource
 from resources.auth import AdminLoginResource
+from resources.dashboard import DashboardStatsResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -18,6 +19,7 @@ db.bind(provider='sqlite', filename='sap_database.sqlite', create_db=True)
 app.add_route('/api/siswa', SiswaResource())
 app.add_route('/api/siswa/{siswa_id}', SiswaWithIdResource())
 app.add_route('/api/admin/login', AdminLoginResource())
+app.add_route('/api/dashboard/stats', DashboardStatsResource())
 
 if __name__ == '__main__':
     from models.schema import *
