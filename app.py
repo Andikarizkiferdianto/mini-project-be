@@ -7,6 +7,7 @@ from waitress import serve
 from resources.siswa import SiswaResource, SiswaWithIdResource
 from resources.auth import AdminLoginResource
 from resources.dashboard import DashboardStatsResource
+from resources.kelas import KelasResource, KelasWithIdResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -20,6 +21,8 @@ app.add_route('/api/siswa', SiswaResource())
 app.add_route('/api/siswa/{siswa_id}', SiswaWithIdResource())
 app.add_route('/api/admin/login', AdminLoginResource())
 app.add_route('/api/dashboard/stats', DashboardStatsResource())
+app.add_route('/api/kelas', KelasResource())
+app.add_route('/api/kelas/{kelas_id}', KelasWithIdResource())
 
 if __name__ == '__main__':
     from models.schema import *
