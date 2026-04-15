@@ -27,17 +27,25 @@ class SiswaResource:
 
     @db_session
     def on_post(self, req, resp):
-        payload = json.loads(req.stream.read(req.content_length or 0))
-        Siswa(
-            nis=payload.get('nis'),
-            nama=payload.get('nama'),
-            status_aktif=True
-        )
+        try:
+            payload = json.loads(req.stream.read(req.content_length or 0))
 
-        resp.status = falcon.HTTP_201
-        resp.text = json.dumps({
-            "message": "Data siswa berhasil ditambahkan!"
-        })
+            kelas_id = payload.get('kelas_id')
+            obj_kelas = Kelas.get(id=kelas_id)
+
+            Siswa(
+                nis=payload.get('nis'),
+                nama=payload.get('nama'),
+                status_aktif=True,
+                kelas=obj_kelas
+            )
+
+            resp.status = falcon.HTTP_201
+            resp.text = json.dumps({"message": "Data siswa berhasil ditambahkan!"})
+
+        except Exception as e:
+            resp.status = falcon.HTTP_400
+            resp.text = json.dumps({"message": f"Gagal: {str(e)}"})
 
 
 class SiswaWithIdResource:
@@ -57,6 +65,11 @@ class SiswaWithIdResource:
             siswa.nama = payload['nama']
         if 'status_aktif' in payload:
             siswa.status_aktif = payload['status_aktif']
+
+        if 'kelas_id' in payload:
+            obj_kelas = Kelas.get(id=payload['kelas_id'])
+            if obj_kelas:
+                siswa.kelas = obj_kelas
 
         resp.status = falcon.HTTP_200
         resp.text = json.dumps({"message": f"Data siswa {siswa.nama} berhasil diupdate!"})
