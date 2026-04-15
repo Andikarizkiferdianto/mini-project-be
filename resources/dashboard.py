@@ -1,6 +1,7 @@
 import falcon
 import json
-from models.schema import db_session, Siswa, Kelas, Jurusan  # Import model kamu
+from models.schema import db_session, Siswa, Kelas, Jurusan, Absensi
+from datetime import datetime
 
 
 class DashboardStatsResource:
@@ -9,8 +10,22 @@ class DashboardStatsResource:
             total_siswa = Siswa.select().count()
             total_kelas = Kelas.select().count()
             total_jurusan = Jurusan.select().count()
+            total_alumni = Siswa.select(lambda s: s.status_aktif == False).count()
 
-            total_alumni = Siswa.select(lambda s: s.status == 'Alumni').count() if hasattr(Siswa, 'status') else 0
+            hari_ini = datetime.now().strftime("%Y-%m-%d")
+            hadir_count = 0
+            sakit_izin_count = 0
+
+            list_absensi = Absensi.select()[:]
+
+            for a in list_absensi:
+                if a.tanggal.strftime("%Y-%m-%d") == hari_ini:
+                    if a.status_hadir == "Hadir":
+                        hadir_count += 1
+                    elif a.status_hadir in ["Sakit", "Izin"]:
+                        sakit_izin_count += 1
+
+            alpha_count = total_siswa - hadir_count - sakit_izin_count
 
             data = {
                 "akademik": {
@@ -22,16 +37,11 @@ class DashboardStatsResource:
                     "total_alumni": total_alumni,
                     "total_ekstrakurikuler": 12
                 },
-                "keuangan": {
-                    "total_pendapatan_bulan_ini": 25500000,
-                    "total_tagihan_tertunggak": 8500000,
-                    "total_kas_keluar": 12000000
-                },
                 "grafik_kehadiran_hari_ini": {
-                    "hadir": 0,
-                    "izin": 0,
+                    "hadir": hadir_count,
+                    "izin": sakit_izin_count,
                     "sakit": 0,
-                    "alpha": total_siswa
+                    "alpha": max(0, alpha_count)
                 }
             }
 
