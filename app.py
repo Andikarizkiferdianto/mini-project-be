@@ -8,6 +8,8 @@ from resources.siswa import SiswaResource, SiswaWithIdResource
 from resources.auth import AdminLoginResource
 from resources.dashboard import DashboardStatsResource
 from resources.kelas import KelasResource, KelasWithIdResource
+from resources.jurusan import JurusanResource, JurusanWithIdResource
+from resources.absensi import AbsensiResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -23,6 +25,9 @@ app.add_route('/api/admin/login', AdminLoginResource())
 app.add_route('/api/dashboard/stats', DashboardStatsResource())
 app.add_route('/api/kelas', KelasResource())
 app.add_route('/api/kelas/{kelas_id}', KelasWithIdResource())
+app.add_route('/api/jurusan', JurusanResource())
+app.add_route('/api/jurusan/{jurusan_id}', JurusanWithIdResource())
+app.add_route('/api/absensi', AbsensiResource())
 
 if __name__ == '__main__':
     from models.schema import *
