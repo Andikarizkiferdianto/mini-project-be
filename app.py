@@ -1,4 +1,6 @@
 import falcon
+import pymysql
+pymysql.install_as_MySQLdb()
 from falcon_cors import CORS
 from models.schema import db, AdminUser
 from pony.orm import db_session
@@ -17,7 +19,7 @@ cors = CORS(allow_all_origins=True,
 
 app = falcon.App(middleware=[cors.middleware])
 
-db.bind(provider='sqlite', filename='sap_database.sqlite', create_db=True)
+db.bind(provider='mysql', host='localhost', user='root', passwd='', db='sap_database')
 
 app.add_route('/api/siswa', SiswaResource())
 app.add_route('/api/siswa/{siswa_id}', SiswaWithIdResource())
