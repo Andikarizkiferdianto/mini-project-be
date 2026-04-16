@@ -39,6 +39,7 @@ class Jurusan(db.Entity):
     kode_jurusan = Required(str, unique=True)
     nama_jurusan = Required(str)
     kelas = Set('Kelas')
+    siswa = Set('Siswa')
 
 
 class Kelas(db.Entity):
@@ -61,6 +62,7 @@ class Siswa(db.Entity):
     alamat = Optional(str)
     status_aktif = Required(bool, default=True)
     kelas = Optional(Kelas)
+    jurusan = Optional(Jurusan)
     absensi = Set('Absensi')
 
 
