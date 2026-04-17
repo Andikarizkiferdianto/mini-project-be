@@ -1,88 +1,119 @@
 import json
 import falcon
-from pony.orm import db_session, select
-from models.schema import Siswa, Kelas
+from pony.orm import db_session, commit, rollback, flush
+from models.schema import Siswa, Kelas, Jurusan
+from datetime import datetime
 
 
 class SiswaResource:
     @db_session
     def on_get(self, req, resp):
-        semua_siswa = select(s for s in Siswa)[:]
-
+        rollback()
+        semua_siswa = Siswa.select().prefetch(Kelas, Jurusan)[:]
         data = []
         for s in semua_siswa:
             data.append({
                 "id": s.id,
                 "nis": s.nis,
                 "nama": s.nama,
-                "status_aktif": s.status_aktif,
-                "kelas": s.kelas.nama_kelas if s.kelas else "Belum Ada Kelas"
+                "tgl_lahir": s.tgl_lahir.strftime("%Y-%m-%d") if isinstance(s.tgl_lahir, datetime) else str(
+                    s.tgl_lahir or "-"),
+                "alamat": s.alamat or "-",
+                "kelas": s.kelas.nama_kelas if s.kelas else "Belum Set",
+                "status_aktif": s.status_aktif
             })
-
         resp.status = falcon.HTTP_200
-        resp.text = json.dumps({
-            "message": "Berhasil mengambil data siswa",
-            "data": data
-        })
+        resp.text = json.dumps({"data": data})
 
     @db_session
     def on_post(self, req, resp):
         try:
             payload = json.loads(req.stream.read(req.content_length or 0))
 
-            kelas_id = payload.get('kelas_id')
-            obj_kelas = Kelas.get(id=kelas_id)
+            tgl_lahir_obj = None
+            if payload.get('tgl_lahir'):
+                tgl_lahir_obj = datetime.strptime(payload.get('tgl_lahir'), '%Y-%m-%d')
+
+            kelas_obj = Kelas.get(id=payload.get('id_kelas')) if payload.get('id_kelas') else None
+            jurusan_obj = Jurusan.get(id=payload.get('id_jurusan')) if payload.get('id_jurusan') else None
 
             Siswa(
                 nis=payload.get('nis'),
+                nisn=payload.get('nisn'),
                 nama=payload.get('nama'),
+                tempat_lahir=payload.get('tempat_lahir'),
+                tgl_lahir=tgl_lahir_obj,
+                jenis_kelamin=payload.get('jenis_kelamin'),
+                alamat=payload.get('alamat'),
+                agama=payload.get('agama'),
+                golongan_darah=payload.get('golongan_darah'),
+                tahun_ajaran=payload.get('tahun_ajaran'),
+                tahun_masuk=payload.get('tahun_masuk'),
+                sekolah_asal=payload.get('sekolah_asal'),
+                no_hp=payload.get('no_hp'),
+                # Data Orang Tua
+                nama_ayah=payload.get('nama_ayah'),
+                pekerjaan_ayah=payload.get('pekerjaan_ayah'),
+                no_hp_ayah=payload.get('no_hp_ayah'),
+                nama_ibu=payload.get('nama_ibu'),
+                pekerjaan_ibu=payload.get('pekerjaan_ibu'),
+                no_hp_ibu=payload.get('no_hp_ibu'),
+                nama_wali=payload.get('nama_wali'),
+                no_hp_wali=payload.get('no_hp_wali'),
+                hubungan_wali=payload.get('hubungan_wali'),
                 status_aktif=True,
-                kelas=obj_kelas
+                kelas=kelas_obj,
+                jurusan=jurusan_obj
             )
 
+            commit()
             resp.status = falcon.HTTP_201
-            resp.text = json.dumps({"message": "Data siswa berhasil ditambahkan!"})
+            resp.text = json.dumps({"message": "Siswa berhasil ditambahkan!"})
 
         except Exception as e:
+            rollback()
             resp.status = falcon.HTTP_400
-            resp.text = json.dumps({"message": f"Gagal: {str(e)}"})
+            resp.text = json.dumps({"message": f"Gagal simpan: {str(e)}"})
 
 
 class SiswaWithIdResource:
     @db_session
     def on_put(self, req, resp, siswa_id):
-        payload = json.loads(req.stream.read(req.content_length or 0))
-        siswa = Siswa.get(id=siswa_id)
+        try:
+            payload = json.loads(req.stream.read(req.content_length or 0))
+            siswa = Siswa.get(id=siswa_id)
 
-        if not siswa:
-            resp.status = falcon.HTTP_404
-            resp.text = json.dumps({"message": "Data siswa tidak ditemukan!"})
-            return
+            if not siswa:
+                resp.status = falcon.HTTP_404
+                resp.text = json.dumps({"message": "Siswa tidak ketemu!"})
+                return
 
-        if 'nis' in payload:
-            siswa.nis = payload['nis']
-        if 'nama' in payload:
-            siswa.nama = payload['nama']
-        if 'status_aktif' in payload:
-            siswa.status_aktif = payload['status_aktif']
+            if 'nis' in payload: siswa.nis = payload['nis']
+            if 'nama' in payload: siswa.nama = payload['nama']
+            if 'alamat' in payload: siswa.alamat = payload['alamat']
 
-        if 'kelas_id' in payload:
-            obj_kelas = Kelas.get(id=payload['kelas_id'])
-            if obj_kelas:
-                siswa.kelas = obj_kelas
+            if 'tgl_lahir' in payload and payload['tgl_lahir']:
+                siswa.tgl_lahir = datetime.strptime(payload['tgl_lahir'], '%Y-%m-%d')
 
-        resp.status = falcon.HTTP_200
-        resp.text = json.dumps({"message": f"Data siswa {siswa.nama} berhasil diupdate!"})
+            if 'id_kelas' in payload:
+                siswa.kelas = Kelas.get(id=payload['id_kelas'])
+            if 'id_jurusan' in payload:
+                siswa.jurusan = Jurusan.get(id=payload['id_jurusan'])
+
+            commit()
+            resp.status = falcon.HTTP_200
+            resp.text = json.dumps({"message": f"Data {siswa.nama} berhasil diupdate!"})
+        except Exception as e:
+            resp.status = falcon.HTTP_400
+            resp.text = json.dumps({"message": f"Gagal update: {str(e)}"})
 
     @db_session
     def on_delete(self, req, resp, siswa_id):
         siswa = Siswa.get(id=siswa_id)
-
         if not siswa:
             resp.status = falcon.HTTP_404
-            resp.text = json.dumps({"message": "Data siswa tidak ditemukan!"})
             return
-
         siswa.delete()
+        commit()
         resp.status = falcon.HTTP_200
-        resp.text = json.dumps({"message": "Data siswa berhasil dihapus!"})
+        resp.text = json.dumps({"message": "Berhasil hapus"})

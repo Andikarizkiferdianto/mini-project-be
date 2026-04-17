@@ -7,7 +7,7 @@ from models.schema import Kelas, Jurusan, TahunAjaran
 class KelasResource:
     @db_session
     def on_get(self, req, resp):
-        semua_kelas = select(k for k in Kelas)[:]
+        semua_kelas = Kelas.select()[:]
 
         data = []
         for k in semua_kelas:

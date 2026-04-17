@@ -7,7 +7,7 @@ from models.schema import Jurusan
 class JurusanResource:
     @db_session
     def on_get(self, req, resp):
-        semua_jurusan = select(j for j in Jurusan)[:]
+        semua_jurusan = Jurusan.select()[:]
 
         data = []
         for j in semua_jurusan:

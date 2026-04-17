@@ -39,6 +39,7 @@ class Jurusan(db.Entity):
     kode_jurusan = Required(str, unique=True)
     nama_jurusan = Required(str)
     kelas = Set('Kelas')
+    siswa = Set('Siswa')
 
 
 class Kelas(db.Entity):
@@ -56,20 +57,40 @@ class Siswa(db.Entity):
     _table_ = "siswa"
     id = PrimaryKey(int, auto=True)
     nis = Required(str, unique=True)
+    nisn = Optional(str)
     nama = Required(str)
+    tempat_lahir = Optional(str)
     tgl_lahir = Optional(datetime)
-    alamat = Optional(str)
+    jenis_kelamin = Optional(str)
+    alamat = Optional(LongStr)
+    agama = Optional(str)
+    golongan_darah = Optional(str)
     status_aktif = Required(bool, default=True)
-    kelas = Optional(Kelas)
-    absensi = Set('Absensi')
+    tahun_ajaran = Optional(str)
+    tahun_masuk = Optional(str)
+    sekolah_asal = Optional(str)
+    no_hp = Optional(str)
 
+    nama_ayah = Optional(str)
+    pekerjaan_ayah = Optional(str)
+    no_hp_ayah = Optional(str)
+    nama_ibu = Optional(str)
+    pekerjaan_ibu = Optional(str)
+    no_hp_ibu = Optional(str)
+    nama_wali = Optional(str)
+    no_hp_wali = Optional(str)
+    hubungan_wali = Optional(str)
+
+    kelas = Optional("Kelas")
+    jurusan = Optional("Jurusan")
+    absensi = Set("Absensi")
 
 class Absensi(db.Entity):
     _table_ = "absensi"
     id = PrimaryKey(int, auto=True)
     siswa = Required(Siswa)
     tanggal = Required(datetime)
-    status_hadir = Required(str)  # "Hadir", "Izin", "Sakit", "Alfa"
+    status_hadir = Required(str)
     jam_masuk = Optional(str)
     jam_pulang = Optional(str)
     keterangan = Optional(str)
