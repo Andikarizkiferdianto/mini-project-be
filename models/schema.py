@@ -77,9 +77,6 @@ class Siswa(db.Entity):
     nama_ibu = Optional(str)
     pekerjaan_ibu = Optional(str)
     no_hp_ibu = Optional(str)
-    nama_wali = Optional(str)
-    no_hp_wali = Optional(str)
-    hubungan_wali = Optional(str)
 
     kelas = Optional("Kelas")
     jurusan = Optional("Jurusan")
