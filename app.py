@@ -12,6 +12,7 @@ from resources.dashboard import DashboardStatsResource
 from resources.kelas import KelasResource, KelasWithIdResource
 from resources.jurusan import JurusanResource, JurusanWithIdResource
 from resources.absensi import AbsensiResource
+from resources.ekskul import EkskulResource, EkskulDetailResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -30,6 +31,8 @@ app.add_route('/api/kelas/{kelas_id}', KelasWithIdResource())
 app.add_route('/api/jurusan', JurusanResource())
 app.add_route('/api/jurusan/{jurusan_id}', JurusanWithIdResource())
 app.add_route('/api/absensi', AbsensiResource())
+app.add_route('/api/ekskul', EkskulResource())
+app.add_route('/api/ekskul/{ekskul_id}', EkskulDetailResource())
 
 if __name__ == '__main__':
     from models.schema import *
