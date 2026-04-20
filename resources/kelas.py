@@ -51,6 +51,25 @@ class KelasResource:
             resp.status = falcon.HTTP_400
             resp.text = json.dumps({"message": f"Gagal tambah kelas: {str(e)}"})
 
+@db_session
+def on_put(self, req, resp, kelas_id):
+    kelas = Kelas.get(id=kelas_id)
+
+    if not kelas:
+        resp.status = falcon.HTTP_404
+        resp.text = json.dumps({"message": "Kelas tidak ditemukan!"})
+        return
+
+    payload = json.loads(req.stream.read(req.content_length or 0))
+
+    kelas.kode_kelas = payload.get('kode_kelas', kelas.kode_kelas)
+    kelas.nama_kelas = payload.get('nama_kelas', kelas.nama_kelas)
+    kelas.wali_kelas_name = payload.get('wali_kelas_name', kelas.wali_kelas_name)
+
+    resp.status = falcon.HTTP_200
+    resp.text = json.dumps({
+        "message": f"Kelas {kelas.nama_kelas} berhasil diupdate!"
+    })
 
 class KelasWithIdResource:
     @db_session
