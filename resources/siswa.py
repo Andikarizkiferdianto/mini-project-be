@@ -16,16 +16,22 @@ class SiswaResource:
             data.append({
                 "id": s.id,
                 "nis": s.nis,
+                "nisn": s.nisn or "-",
                 "nama": s.nama,
-                "tgl_lahir": s.tgl_lahir.strftime("%Y-%m-%d") if isinstance(s.tgl_lahir, datetime) else str(s.tgl_lahir or "-"),
+                "tempat_lahir": s.tempat_lahir or "-",
+                "tgl_lahir": s.tgl_lahir.strftime("%Y-%m-%d") if isinstance(s.tgl_lahir, datetime) else str(
+                    s.tgl_lahir or "-"),
+                "jenis_kelamin": s.jenis_kelamin or "-",
                 "alamat": s.alamat or "-",
+                "agama": s.agama or "-",
                 "kelas": s.kelas.nama_kelas if s.kelas else "Belum Set",
+                "jurusan": s.jurusan.nama_jurusan if s.jurusan else "Belum Set",
+                "no_hp": s.no_hp or "-",
                 "status_aktif": s.status_aktif
             })
 
         resp.status = falcon.HTTP_200
         resp.text = json.dumps({"data": data})
-
 
     @db_session
     def on_post(self, req, resp):
@@ -59,6 +65,9 @@ class SiswaResource:
                 nama_ibu=payload.get('nama_ibu'),
                 pekerjaan_ibu=payload.get('pekerjaan_ibu'),
                 no_hp_ibu=payload.get('no_hp_ibu'),
+                nama_wali=payload.get('nama_wali'),
+                no_hp_wali=payload.get('no_hp_wali'),
+                hubungan_wali=payload.get('hubungan_wali'),
                 status_aktif=True,
                 kelas=kelas_obj,
                 jurusan=jurusan_obj
@@ -90,24 +99,27 @@ class SiswaWithIdResource:
             "data": {
                 "id": siswa.id,
                 "nis": siswa.nis,
-                "nisn": siswa.nisn,
+                "nisn": siswa.nisn or "-",
                 "nama": siswa.nama,
-                "tempat_lahir": siswa.tempat_lahir,
+                "tempat_lahir": siswa.tempat_lahir or "-",
                 "tgl_lahir": siswa.tgl_lahir.strftime("%Y-%m-%d") if siswa.tgl_lahir else "",
-                "jenis_kelamin": siswa.jenis_kelamin,
-                "alamat": siswa.alamat,
-                "agama": siswa.agama,
-                "golongan_darah": siswa.golongan_darah,
-                "tahun_ajaran": siswa.tahun_ajaran,
-                "tahun_masuk": siswa.tahun_masuk,
-                "sekolah_asal": siswa.sekolah_asal,
-                "no_hp": siswa.no_hp,
-                "nama_ayah": siswa.nama_ayah,
-                "pekerjaan_ayah": siswa.pekerjaan_ayah,
-                "no_hp_ayah": siswa.no_hp_ayah,
-                "nama_ibu": siswa.nama_ibu,
-                "pekerjaan_ibu": siswa.pekerjaan_ibu,
-                "no_hp_ibu": siswa.no_hp_ibu,
+                "jenis_kelamin": siswa.jenis_kelamin or "-",
+                "alamat": siswa.alamat or "-",
+                "agama": siswa.agama or "-",
+                "golongan_darah": siswa.golongan_darah or "-",
+                "tahun_ajaran": siswa.tahun_ajaran or "-",
+                "tahun_masuk": siswa.tahun_masuk or "-",
+                "sekolah_asal": siswa.sekolah_asal or "-",
+                "no_hp": siswa.no_hp or "-",
+                "nama_ayah": siswa.nama_ayah or "-",
+                "pekerjaan_ayah": siswa.pekerjaan_ayah or "-",
+                "no_hp_ayah": siswa.no_hp_ayah or "-",
+                "nama_ibu": siswa.nama_ibu or "-",
+                "pekerjaan_ibu": siswa.pekerjaan_ibu or "-",
+                "no_hp_ibu": siswa.no_hp_ibu or "-",
+                "nama_wali": getattr(siswa, 'nama_wali', "-"),
+                "no_hp_wali": getattr(siswa, 'no_hp_wali', "-"),
+                "hubungan_wali": getattr(siswa, 'hubungan_wali', "-"),
                 "id_kelas": siswa.kelas.id if siswa.kelas else "",
                 "id_jurusan": siswa.jurusan.id if siswa.jurusan else ""
             }
@@ -124,97 +136,46 @@ class SiswaWithIdResource:
                 resp.text = json.dumps({"message": "Siswa tidak ketemu!"})
                 return
 
-            if payload.get('nis'):
-                siswa.nis = payload['nis']
-
-            if payload.get('nisn'):
-                siswa.nisn = payload['nisn']
-
-            if payload.get('nama'):
-                siswa.nama = payload['nama']
-
-            if payload.get('tempat_lahir'):
-                siswa.tempat_lahir = payload['tempat_lahir']
-
-            if payload.get('tgl_lahir'):
+            if 'nis' in payload: siswa.nis = payload['nis']
+            if 'nisn' in payload: siswa.nisn = payload['nisn']
+            if 'nama' in payload: siswa.nama = payload['nama']
+            if 'tempat_lahir' in payload: siswa.tempat_lahir = payload['tempat_lahir']
+            if 'tgl_lahir' in payload and payload['tgl_lahir']:
                 siswa.tgl_lahir = datetime.strptime(payload['tgl_lahir'], '%Y-%m-%d')
+            if 'jenis_kelamin' in payload: siswa.jenis_kelamin = payload['jenis_kelamin']
+            if 'agama' in payload: siswa.agama = payload['agama']
+            if 'golongan_darah' in payload: siswa.golongan_darah = payload['golongan_darah']
+            if 'alamat' in payload: siswa.alamat = payload['alamat']
+            if 'no_hp' in payload: siswa.no_hp = payload['no_hp']
 
-            if payload.get('jenis_kelamin'):
-                siswa.jenis_kelamin = payload['jenis_kelamin']
+            if 'nama_ayah' in payload: siswa.nama_ayah = payload['nama_ayah']
+            if 'nama_ibu' in payload: siswa.nama_ibu = payload['nama_ibu']
+            if 'nama_wali' in payload: siswa.nama_wali = payload['nama_wali']
+            if 'no_hp_wali' in payload: siswa.no_hp_wali = payload['no_hp_wali']
+            if 'hubungan_wali' in payload: siswa.hubungan_wali = payload['hubungan_wali']
 
-            if payload.get('agama'):
-                siswa.agama = payload['agama']
-
-            if payload.get('golongan_darah'):
-                siswa.golongan_darah = payload['golongan_darah']
-
-            if payload.get('alamat'):
-                siswa.alamat = payload['alamat']
-
-            if payload.get('tahun_ajaran'):
-                siswa.tahun_ajaran = payload['tahun_ajaran']
-
-            if payload.get('tahun_masuk'):
-                siswa.tahun_masuk = payload['tahun_masuk']
-
-            if payload.get('sekolah_asal'):
-                siswa.sekolah_asal = payload['sekolah_asal']
-
-            if payload.get('no_hp'):
-                siswa.no_hp = payload['no_hp']
-
-            if payload.get('nama_ayah'):
-                siswa.nama_ayah = payload['nama_ayah']
-
-            if payload.get('pekerjaan_ayah'):
-                siswa.pekerjaan_ayah = payload['pekerjaan_ayah']
-
-            if payload.get('no_hp_ayah'):
-                siswa.no_hp_ayah = payload['no_hp_ayah']
-
-            if payload.get('nama_ibu'):
-                siswa.nama_ibu = payload['nama_ibu']
-
-            if payload.get('pekerjaan_ibu'):
-                siswa.pekerjaan_ibu = payload['pekerjaan_ibu']
-
-            if payload.get('no_hp_ibu'):
-                siswa.no_hp_ibu = payload['no_hp_ibu']
-
-            if payload.get('id_kelas'):
-                kelas = Kelas.get(id=payload['id_kelas'])
-                if kelas:
-                    siswa.kelas = kelas
-
-            if payload.get('id_jurusan'):
-                jurusan = Jurusan.get(id=payload['id_jurusan'])
-                if jurusan:
-                    siswa.jurusan = jurusan
+            # Update Relasi
+            if 'id_kelas' in payload:
+                siswa.kelas = Kelas.get(id=payload['id_kelas'])
+            if 'id_jurusan' in payload:
+                siswa.jurusan = Jurusan.get(id=payload['id_jurusan'])
 
             commit()
-
             resp.status = falcon.HTTP_200
-            resp.text = json.dumps({
-                "message": f"Data {siswa.nama} berhasil diupdate!"
-            })
+            resp.text = json.dumps({"message": f"Data {siswa.nama} berhasil diupdate!"})
 
         except Exception as e:
             rollback()
             resp.status = falcon.HTTP_400
-            resp.text = json.dumps({
-                "message": f"Gagal update: {str(e)}"
-            })
+            resp.text = json.dumps({"message": f"Gagal update: {str(e)}"})
 
     @db_session
     def on_delete(self, req, resp, siswa_id):
         siswa = Siswa.get(id=siswa_id)
-
         if not siswa:
             resp.status = falcon.HTTP_404
             return
-
         siswa.delete()
         commit()
-
         resp.status = falcon.HTTP_200
         resp.text = json.dumps({"message": "Berhasil hapus"})

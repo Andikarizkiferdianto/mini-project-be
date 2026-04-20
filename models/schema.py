@@ -82,6 +82,7 @@ class Siswa(db.Entity):
     jurusan = Optional("Jurusan")
     absensi = Set("Absensi")
 
+
 class Absensi(db.Entity):
     _table_ = "absensi"
     id = PrimaryKey(int, auto=True)
@@ -101,3 +102,12 @@ class Absensi(db.Entity):
             "status": self.status_hadir,
             "keterangan": self.keterangan
         }
+
+class Ekstrakurikuler(db.Entity):
+    _table_ = "ekstrakurikuler"
+    id = PrimaryKey(int, auto=True)
+    nama_ekskul = Required(str)
+    pembina = Required(str)
+    jadwal = Optional(str)
+    tanggal = Optional(datetime)
+    keterangan = Optional(str)
