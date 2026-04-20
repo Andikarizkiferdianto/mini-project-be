@@ -16,11 +16,27 @@ class SiswaResource:
             data.append({
                 "id": s.id,
                 "nis": s.nis,
+                "nisn": s.nisn,
                 "nama": s.nama,
-                "tgl_lahir": s.tgl_lahir.strftime("%Y-%m-%d") if isinstance(s.tgl_lahir, datetime) else str(s.tgl_lahir or "-"),
-                "alamat": s.alamat or "-",
-                "kelas": s.kelas.nama_kelas if s.kelas else "Belum Set",
-                "status_aktif": s.status_aktif
+                "tempat_lahir": s.tempat_lahir,
+                "tgl_lahir": s.tgl_lahir.strftime("%Y-%m-%d") if s.tgl_lahir else "-",
+                "jenis_kelamin": s.jenis_kelamin,
+                "alamat": s.alamat,
+                "agama": s.agama,
+                "golongan_darah": s.golongan_darah,
+                "tahun_ajaran": s.tahun_ajaran,
+                "tahun_masuk": s.tahun_masuk,
+                "sekolah_asal": s.sekolah_asal,
+                "no_hp": s.no_hp,
+                "nama_ayah": s.nama_ayah,
+                "pekerjaan_ayah": s.pekerjaan_ayah,
+                "no_hp_ayah": s.no_hp_ayah,
+                "nama_ibu": s.nama_ibu,
+                "pekerjaan_ibu": s.pekerjaan_ibu,
+                "no_hp_ibu": s.no_hp_ibu,
+                "kelas": s.kelas.nama_kelas if s.kelas else "-",
+                "jurusan": s.jurusan.nama_jurusan if s.jurusan else "-",
+                "status_aktif": "Aktif" if s.status_aktif else "Nonaktif"
             })
 
         resp.status = falcon.HTTP_200
