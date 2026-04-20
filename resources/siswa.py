@@ -19,15 +19,24 @@ class SiswaResource:
                 "nisn": s.nisn or "-",
                 "nama": s.nama,
                 "tempat_lahir": s.tempat_lahir or "-",
-                "tgl_lahir": s.tgl_lahir.strftime("%Y-%m-%d") if isinstance(s.tgl_lahir, datetime) else str(
-                    s.tgl_lahir or "-"),
+                "tgl_lahir": s.tgl_lahir.strftime("%Y-%m-%d") if isinstance(s.tgl_lahir, datetime) else str(s.tgl_lahir or "-"),
                 "jenis_kelamin": s.jenis_kelamin or "-",
                 "alamat": s.alamat or "-",
                 "agama": s.agama or "-",
+                "golongan_darah": s.golongan_darah or "-",
+                "tahun_ajaran": s.tahun_ajaran or "-",
+                "tahun_masuk": s.tahun_masuk or "-",
+                "sekolah_asal": s.sekolah_asal or "-",
+                "no_hp": s.no_hp or "-",
+                "nama_ayah": s.nama_ayah or "-",
+                "pekerjaan_ayah": s.pekerjaan_ayah or "-",
+                "no_hp_ayah": s.no_hp_ayah or "-",
+                "nama_ibu": s.nama_ibu or "-",
+                "pekerjaan_ibu": s.pekerjaan_ibu or "-",
+                "no_hp_ibu": s.no_hp_ibu or "-",
                 "kelas": s.kelas.nama_kelas if s.kelas else "Belum Set",
                 "jurusan": s.jurusan.nama_jurusan if s.jurusan else "Belum Set",
-                "no_hp": s.no_hp or "-",
-                "status_aktif": s.status_aktif
+                "status_aktif": "Aktif" if s.status_aktif else "Nonaktif"
             })
 
         resp.status = falcon.HTTP_200
@@ -154,7 +163,6 @@ class SiswaWithIdResource:
             if 'no_hp_wali' in payload: siswa.no_hp_wali = payload['no_hp_wali']
             if 'hubungan_wali' in payload: siswa.hubungan_wali = payload['hubungan_wali']
 
-            # Update Relasi
             if 'id_kelas' in payload:
                 siswa.kelas = Kelas.get(id=payload['id_kelas'])
             if 'id_jurusan' in payload:
