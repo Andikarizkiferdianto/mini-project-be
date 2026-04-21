@@ -74,9 +74,6 @@ class SiswaResource:
                 nama_ibu=payload.get('nama_ibu'),
                 pekerjaan_ibu=payload.get('pekerjaan_ibu'),
                 no_hp_ibu=payload.get('no_hp_ibu'),
-                nama_wali=payload.get('nama_wali'),
-                no_hp_wali=payload.get('no_hp_wali'),
-                hubungan_wali=payload.get('hubungan_wali'),
                 status_aktif=True,
                 kelas=kelas_obj,
                 jurusan=jurusan_obj
@@ -126,9 +123,6 @@ class SiswaWithIdResource:
                 "nama_ibu": siswa.nama_ibu or "-",
                 "pekerjaan_ibu": siswa.pekerjaan_ibu or "-",
                 "no_hp_ibu": siswa.no_hp_ibu or "-",
-                "nama_wali": getattr(siswa, 'nama_wali', "-"),
-                "no_hp_wali": getattr(siswa, 'no_hp_wali', "-"),
-                "hubungan_wali": getattr(siswa, 'hubungan_wali', "-"),
                 "id_kelas": siswa.kelas.id if siswa.kelas else "",
                 "id_jurusan": siswa.jurusan.id if siswa.jurusan else ""
             }
@@ -156,13 +150,8 @@ class SiswaWithIdResource:
             if 'golongan_darah' in payload: siswa.golongan_darah = payload['golongan_darah']
             if 'alamat' in payload: siswa.alamat = payload['alamat']
             if 'no_hp' in payload: siswa.no_hp = payload['no_hp']
-
             if 'nama_ayah' in payload: siswa.nama_ayah = payload['nama_ayah']
             if 'nama_ibu' in payload: siswa.nama_ibu = payload['nama_ibu']
-            if 'nama_wali' in payload: siswa.nama_wali = payload['nama_wali']
-            if 'no_hp_wali' in payload: siswa.no_hp_wali = payload['no_hp_wali']
-            if 'hubungan_wali' in payload: siswa.hubungan_wali = payload['hubungan_wali']
-
             if 'id_kelas' in payload:
                 siswa.kelas = Kelas.get(id=payload['id_kelas'])
             if 'id_jurusan' in payload:
