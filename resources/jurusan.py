@@ -50,6 +50,7 @@ class JurusanResource:
 
 
 class JurusanWithIdResource:
+
     @db_session
     def on_delete(self, req, resp, jurusan_id):
         jurusan = Jurusan.get(id=jurusan_id)
@@ -62,3 +63,40 @@ class JurusanWithIdResource:
         jurusan.delete()
         resp.status = falcon.HTTP_200
         resp.text = json.dumps({"message": f"Jurusan {nama} berhasil dihapus!"})
+
+    @db_session
+    def on_put(self, req, resp, jurusan_id):
+        jurusan = Jurusan.get(id=jurusan_id)
+
+        if not jurusan:
+            resp.status = falcon.HTTP_404
+            resp.text = json.dumps({"message": "Jurusan tidak ditemukan!"})
+            return
+
+        try:
+            payload = json.load(req.bounded_stream)
+
+            kode = payload.get("kode_jurusan")
+            nama = payload.get("nama_jurusan")
+
+            cek = Jurusan.get(kode_jurusan=kode)
+            if cek and cek.id != jurusan.id:
+                resp.status = falcon.HTTP_400
+                resp.text = json.dumps({
+                    "message": f"Kode jurusan {kode} sudah digunakan!"
+                })
+                return
+
+            jurusan.kode_jurusan = kode
+            jurusan.nama_jurusan = nama
+
+            resp.status = falcon.HTTP_200
+            resp.text = json.dumps({
+                "message": f"Jurusan {nama} berhasil diupdate!"
+            })
+
+        except Exception as e:
+            resp.status = falcon.HTTP_400
+            resp.text = json.dumps({
+                "message": f"Gagal update: {str(e)}"
+            })
