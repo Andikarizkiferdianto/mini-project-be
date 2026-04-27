@@ -31,6 +31,7 @@ class TahunAjaran(db.Entity):
     nama = Required(str)
     is_active = Required(bool, default=False)
     kelas = Set('Kelas')
+    semesters = Set('Semester')
 
 
 class Jurusan(db.Entity):
@@ -111,3 +112,22 @@ class Ekstrakurikuler(db.Entity):
     jadwal = Optional(str)
     tanggal = Optional(datetime)
     keterangan = Optional(str)
+
+class AspekPenilaian(db.Entity):
+    _table_ = "aspek_penilaian"
+    id = PrimaryKey(int, auto=True)
+    nama_aspek = Required(str)
+    keterangan = Optional(str)
+    can_edit = Required(bool, default=True)
+
+class Semester(db.Entity):
+    _table_ = "semester"
+    id = PrimaryKey(int, auto=True)
+    tahun_ajaran = Required('TahunAjaran')
+    jenis_semester = Required(str)
+    nama_semester = Required(str)
+
+class JenisSemester(db.Entity):
+    _table_ = "jenis_semester"
+    id = PrimaryKey(int, auto=True)
+    nama = Required(str)
