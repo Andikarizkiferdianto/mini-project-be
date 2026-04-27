@@ -52,6 +52,7 @@ class Kelas(db.Entity):
     tahun_ajaran = Optional(TahunAjaran)
     wali_kelas_name = Optional(str)
     siswa = Set('Siswa')
+    jadwal = Set('JadwalMengajar')
 
 
 class Siswa(db.Entity):
@@ -126,8 +127,32 @@ class Semester(db.Entity):
     tahun_ajaran = Required('TahunAjaran')
     jenis_semester = Required(str)
     nama_semester = Required(str)
+    jadwal = Set('JadwalMengajar')
 
 class JenisSemester(db.Entity):
     _table_ = "jenis_semester"
     id = PrimaryKey(int, auto=True)
     nama = Required(str)
+
+class Guru(db.Entity):
+    _table_ = "guru"
+    id = PrimaryKey(int, auto=True)
+    nama = Required(str)
+    nip = Optional(str, unique=True)
+    jadwal = Set('JadwalMengajar')
+
+class MataPelajaran(db.Entity):
+    _table_ = "mata_pelajaran"
+    id = PrimaryKey(int, auto=True)
+    nama_mapel = Required(str)
+    jadwal = Set('JadwalMengajar')
+
+class JadwalMengajar(db.Entity):
+    _table_ = "jadwal_mengajar"
+    id = PrimaryKey(int, auto=True)
+    hari = Required(str)
+    jam = Required(str)
+    guru = Required(Guru)
+    mapel = Required(MataPelajaran)
+    kelas = Required(Kelas)
+    semester = Required(Semester)

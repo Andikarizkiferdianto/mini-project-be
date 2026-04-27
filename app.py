@@ -17,6 +17,9 @@ from resources.aspek import AspekResource, AspekDetailResource
 from resources.semester import SemesterResource, SemesterDetailResource
 from resources.tahun_ajaran import TahunAjaranResource, TahunAjaranWithIdResource
 from resources.jenis_semester import JenisSemesterResource, JenisSemesterDetailResource
+from resources.jadwal import JadwalResource, JadwalDetailResource
+from resources.mata_pelajaran import MataPelajaranResource, MataPelajaranDetailResource
+from resources.guru import GuruResource, GuruDetailResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -45,6 +48,12 @@ app.add_route('/api/tahun-ajaran', TahunAjaranResource())
 app.add_route('/api/tahun-ajaran/{ta_id}', TahunAjaranWithIdResource())
 app.add_route('/api/jenis-semester', JenisSemesterResource())
 app.add_route('/api/jenis-semester/{js_id}', JenisSemesterDetailResource())
+app.add_route('/api/jadwal', JadwalResource())
+app.add_route('/api/jadwal/{j_id}', JadwalDetailResource())
+app.add_route('/api/mata-pelajaran', MataPelajaranResource())
+app.add_route('/api/mata-pelajaran/{mp_id}', MataPelajaranDetailResource())
+app.add_route('/api/guru', GuruResource())
+app.add_route('/api/guru/{g_id}', GuruDetailResource())
 
 if __name__ == '__main__':
     from models.schema import *
