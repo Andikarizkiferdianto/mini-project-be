@@ -1,6 +1,6 @@
 import falcon
 import json
-from models.schema import db_session, Siswa, Kelas, Jurusan, Absensi
+from models.schema import db_session, Siswa, Kelas, Jurusan, Absensi, Ekstrakurikuler
 from datetime import datetime
 
 
@@ -11,6 +11,7 @@ class DashboardStatsResource:
             total_kelas = Kelas.select().count()
             total_jurusan = Jurusan.select().count()
             total_alumni = Siswa.select(lambda s: s.status_aktif == False).count()
+            total_eskul = Ekstrakurikuler.select().count()
 
             hari_ini = datetime.now().strftime("%Y-%m-%d")
             hadir_count = 0
@@ -35,7 +36,7 @@ class DashboardStatsResource:
                     "total_kelas": total_kelas,
                     "total_jurusan": total_jurusan,
                     "total_alumni": total_alumni,
-                    "total_ekstrakurikuler": 12
+                    "total_ekstrakurikuler" : total_eskul
                 },
                 "grafik_kehadiran_hari_ini": {
                     "hadir": hadir_count,
