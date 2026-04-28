@@ -83,6 +83,7 @@ class Siswa(db.Entity):
     kelas = Optional("Kelas")
     jurusan = Optional("Jurusan")
     absensi = Set("Absensi")
+    tagihan = Set('BayarTagihan')
 
 
 class Absensi(db.Entity):
@@ -152,7 +153,30 @@ class JadwalMengajar(db.Entity):
     id = PrimaryKey(int, auto=True)
     hari = Required(str)
     jam = Required(str)
-    guru = Required(Guru)
-    mapel = Required(MataPelajaran)
-    kelas = Required(Kelas)
-    semester = Required(Semester)
+    guru = Required('Guru')
+    mapel = Required('MataPelajaran')
+    kelas = Required('Kelas')
+    semester = Required('Semester')
+
+class BayarTagihan(db.Entity):
+    _table_ = 'bayar_tagihan'
+    id = PrimaryKey(int, auto=True)
+    siswa = Required('Siswa')
+    jenis_pembayaran = Required('JenisPembayaran')
+    nominal = Required(float)
+    tanggal_bayar = Required(datetime, default=lambda: datetime.now())
+    metode_pembayaran = Required(str)
+    keterangan = Optional(str)
+
+
+class JenisPembayaran(db.Entity):
+    _table_ = 'jenis_pembayaran'
+    id = PrimaryKey(int, auto=True)
+    kode_akun = Required(str)
+    nama_pembayaran = Required(str)
+    akun_harta = Optional(str)
+    akun_pendapatan = Optional(str)
+    akun_hutang = Optional(str)
+    tipe = Required(str)
+    status = Required(str, default='aktif')
+    tagihan_siswa = Set('BayarTagihan')
