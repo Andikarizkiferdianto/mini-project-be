@@ -27,8 +27,8 @@ class AdminUser(db.Entity):
 class TahunAjaran(db.Entity):
     _table_ = "tahun_ajaran"
     id = PrimaryKey(int, auto=True)
-    tahun = Required(str)
     nama = Required(str)
+    tahun = Required(str)
     is_active = Required(bool, default=False)
     kelas = Set('Kelas')
     semesters = Set('Semester')
