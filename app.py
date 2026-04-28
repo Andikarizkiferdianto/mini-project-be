@@ -20,6 +20,7 @@ from resources.jenis_semester import JenisSemesterResource, JenisSemesterDetailR
 from resources.jadwal import JadwalResource, JadwalDetailResource
 from resources.mata_pelajaran import MataPelajaranResource, MataPelajaranDetailResource
 from resources.guru import GuruResource, GuruDetailResource
+from resources.jenis_pembayaran import JenisPembayaranResource, JenisPembayaranDetailResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -54,6 +55,8 @@ app.add_route('/api/mata-pelajaran', MataPelajaranResource())
 app.add_route('/api/mata-pelajaran/{mp_id}', MataPelajaranDetailResource())
 app.add_route('/api/guru', GuruResource())
 app.add_route('/api/guru/{g_id}', GuruDetailResource())
+app.add_route('/api/jenis-pembayaran', JenisPembayaranResource())
+app.add_route('/api/jenis-pembayaran/{jp_id}', JenisPembayaranDetailResource())
 
 if __name__ == '__main__':
     from models.schema import *
