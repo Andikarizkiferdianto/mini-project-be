@@ -37,6 +37,37 @@ class AspekResource:
 
 
 class AspekDetailResource:
+
+    @db_session
+    def on_put(self, req, resp, aspek_id):
+        try:
+            aspek = AspekPenilaian.get(id=aspek_id)
+
+            if not aspek:
+                resp.status = falcon.HTTP_404
+                resp.text = json.dumps({"message": "Data tidak ditemukan"})
+                return
+
+            if not aspek.can_edit:
+                resp.status = falcon.HTTP_403
+                resp.text = json.dumps({"message": "Data ini dikunci (tidak bisa diedit)!"})
+                return
+
+            payload = json.loads(req.stream.read(req.content_length or 0))
+
+            aspek.nama_aspek = payload.get("nama_aspek", aspek.nama_aspek)
+            aspek.keterangan = payload.get("keterangan", aspek.keterangan)
+
+            commit()
+
+            resp.status = falcon.HTTP_200
+            resp.text = json.dumps({"message": "Aspek berhasil diupdate!"})
+
+        except Exception as e:
+            resp.status = falcon.HTTP_400
+            resp.text = json.dumps({"message": str(e)})
+
+
     @db_session
     def on_delete(self, req, resp, aspek_id):
         aspek = AspekPenilaian.get(id=aspek_id)

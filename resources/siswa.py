@@ -36,7 +36,7 @@ class SiswaResource:
                 "no_hp_ibu": s.no_hp_ibu or "-",
                 "kelas": s.kelas.nama_kelas if s.kelas else "Belum Set",
                 "jurusan": s.jurusan.nama_jurusan if s.jurusan else "Belum Set",
-                "status_aktif": "Aktif" if s.status_aktif else "Nonaktif"
+                "status_aktif": s.status_aktif
             })
 
         resp.status = falcon.HTTP_200
@@ -74,7 +74,7 @@ class SiswaResource:
                 nama_ibu=payload.get('nama_ibu'),
                 pekerjaan_ibu=payload.get('pekerjaan_ibu'),
                 no_hp_ibu=payload.get('no_hp_ibu'),
-                status_aktif=True,
+                status_aktif=payload.get('status_aktif', 'Aktif'),
                 kelas=kelas_obj,
                 jurusan=jurusan_obj
             )
@@ -124,7 +124,8 @@ class SiswaWithIdResource:
                 "pekerjaan_ibu": siswa.pekerjaan_ibu or "-",
                 "no_hp_ibu": siswa.no_hp_ibu or "-",
                 "id_kelas": siswa.kelas.id if siswa.kelas else "",
-                "id_jurusan": siswa.jurusan.id if siswa.jurusan else ""
+                "id_jurusan": siswa.jurusan.id if siswa.jurusan else "",
+                "status_aktif": siswa.status_aktif,
             }
         })
 
@@ -156,6 +157,9 @@ class SiswaWithIdResource:
                 siswa.kelas = Kelas.get(id=payload['id_kelas'])
             if 'id_jurusan' in payload:
                 siswa.jurusan = Jurusan.get(id=payload['id_jurusan'])
+            if 'status_aktif' in payload:
+                siswa.status_aktif = payload['status_aktif']
+
 
             commit()
             resp.status = falcon.HTTP_200

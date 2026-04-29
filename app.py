@@ -15,7 +15,7 @@ from resources.absensi import AbsensiResource
 from resources.ekskul import EkskulResource, EkskulDetailResource
 from resources.aspek import AspekResource, AspekDetailResource
 from resources.semester import SemesterResource, SemesterDetailResource
-from resources.tahun_ajaran import TahunAjaranResource, TahunAjaranWithIdResource
+from resources.tahun_ajaran import TahunAjaranResource, TahunAjaranWithIdResource, TahunAjaranActiveResource
 from resources.jenis_semester import JenisSemesterResource, JenisSemesterDetailResource
 from resources.jadwal import JadwalResource, JadwalDetailResource
 from resources.mata_pelajaran import MataPelajaranResource, MataPelajaranDetailResource
@@ -47,6 +47,7 @@ app.add_route('/api/semester', SemesterResource())
 app.add_route('/api/semester/{semester_id}', SemesterDetailResource())
 app.add_route('/api/tahun-ajaran', TahunAjaranResource())
 app.add_route('/api/tahun-ajaran/{ta_id}', TahunAjaranWithIdResource())
+app.add_route('/api/tahun-ajaran/active', TahunAjaranActiveResource())
 app.add_route('/api/jenis-semester', JenisSemesterResource())
 app.add_route('/api/jenis-semester/{js_id}', JenisSemesterDetailResource())
 app.add_route('/api/jadwal', JadwalResource())

@@ -67,7 +67,7 @@ class Siswa(db.Entity):
     alamat = Optional(LongStr)
     agama = Optional(str)
     golongan_darah = Optional(str)
-    status_aktif = Required(bool, default=True)
+    status_aktif = Required(str, default="Aktif")
     tahun_ajaran = Optional(str)
     tahun_masuk = Optional(str)
     sekolah_asal = Optional(str)
