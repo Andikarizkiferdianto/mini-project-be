@@ -24,6 +24,30 @@ class JenisSemesterResource:
             resp.text = json.dumps({"error": str(e)})
 
 class JenisSemesterDetailResource:
+
+    @db_session
+    def on_put(self, req, resp, js_id):
+        try:
+            js = JenisSemester.get(id=js_id)
+
+            if not js:
+                resp.status = falcon.HTTP_404
+                resp.text = json.dumps({"message": "Data tidak ditemukan"})
+                return
+
+            payload = json.loads(req.stream.read(req.content_length or 0))
+
+            js.nama = payload.get("nama", js.nama)
+
+            commit()
+
+            resp.status = falcon.HTTP_200
+            resp.text = json.dumps({"message": "Jenis Semester berhasil diupdate!"})
+
+        except Exception as e:
+            resp.status = falcon.HTTP_400
+            resp.text = json.dumps({"message": str(e)})
+
     @db_session
     def on_delete(self, req, resp, js_id):
         js = JenisSemester.get(id=js_id)
