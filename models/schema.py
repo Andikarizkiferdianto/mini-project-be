@@ -1,5 +1,6 @@
 from pony.orm import *
-from datetime import datetime
+from datetime import datetime, date
+import decimal
 
 db = Database()
 
@@ -84,6 +85,7 @@ class Siswa(db.Entity):
     jurusan = Optional("Jurusan")
     absensi = Set("Absensi")
     tagihan = Set('BayarTagihan')
+    peminjaman = Set('Peminjaman')
 
 
 class Absensi(db.Entity):
@@ -180,3 +182,30 @@ class JenisPembayaran(db.Entity):
     tipe = Required(str)
     status = Required(str, default='aktif')
     tagihan_siswa = Set('BayarTagihan')
+
+
+class Buku(db.Entity):
+    _table_ = 'buku'
+    id = PrimaryKey(int, auto=True)
+    judul_buku = Required(str)
+    penulis = Required(str)
+    penerbit = Required(str)
+    tahun = Required(int)
+    isbn = Required(str)
+    barcode = Optional(str, unique=True)
+    harga = Optional(decimal.Decimal)
+    kondisi = Required(str)
+    kategori = Required(str)
+    rak = Required(str)
+    stok = Required(int, default=1)
+    peminjaman = Set('Peminjaman')
+
+class Peminjaman(db.Entity):
+    _table_ = "peminjaman"
+    siswa = Required(Siswa)
+    buku = Required(Buku)
+    tgl_pinjam = Required(date)
+    tgl_kembali = Required(date)
+    tgl_aktual_kembali = Optional(date)
+    status = Required(str, default="Dipinjam")
+    jumlah = Required(int, default=1)
