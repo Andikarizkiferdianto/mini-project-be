@@ -66,7 +66,7 @@ app.add_route('/api/buku/{buku_id}', BukuDetailResource())
 app.add_route('/api/peminjaman', PeminjamanResource())
 app.add_route('/api/peminjaman/{p_id}', PeminjamanDetailResource())
 app.add_route('/api/peminjaman/scan', ScanBukuResource())
-app.add_route('/api/dashboard', DashboardResource())
+app.add_route('/api/dashboard-perpus', DashboardResource())
 
 if __name__ == '__main__':
     from models.schema import *

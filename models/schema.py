@@ -1,7 +1,6 @@
 from pony.orm import *
-from datetime import datetime
-import decimal
 from datetime import datetime, date
+import decimal
 
 db = Database()
 

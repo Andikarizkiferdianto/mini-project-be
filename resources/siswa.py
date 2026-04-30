@@ -74,7 +74,10 @@ class SiswaResource:
                 nama_ibu=payload.get('nama_ibu', ''),
                 pekerjaan_ibu=payload.get('pekerjaan_ibu', ''),
                 no_hp_ibu=payload.get('no_hp_ibu', ''),
-                status_aktif=True,
+
+                # INI KUNCINYA: Ambil dari Postman, kalau gak ada kasih default "Aktif"
+                status_aktif=str(payload.get('status_aktif', 'Aktif')),
+
                 kelas=kelas_obj,
                 jurusan=jurusan_obj
             )
