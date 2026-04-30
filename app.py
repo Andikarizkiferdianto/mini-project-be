@@ -21,6 +21,9 @@ from resources.jadwal import JadwalResource, JadwalDetailResource
 from resources.mata_pelajaran import MataPelajaranResource, MataPelajaranDetailResource
 from resources.guru import GuruResource, GuruDetailResource
 from resources.jenis_pembayaran import JenisPembayaranResource, JenisPembayaranDetailResource
+from resources.buku import BukuResource, BukuDetailResource
+from resources.peminjaman import PeminjamanResource, ScanBukuResource, PeminjamanDetailResource
+from resources.dashboard_perpus import DashboardResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -58,6 +61,12 @@ app.add_route('/api/guru', GuruResource())
 app.add_route('/api/guru/{g_id}', GuruDetailResource())
 app.add_route('/api/jenis-pembayaran', JenisPembayaranResource())
 app.add_route('/api/jenis-pembayaran/{jp_id}', JenisPembayaranDetailResource())
+app.add_route('/api/buku', BukuResource())
+app.add_route('/api/buku/{buku_id}', BukuDetailResource())
+app.add_route('/api/peminjaman', PeminjamanResource())
+app.add_route('/api/peminjaman/{p_id}', PeminjamanDetailResource())
+app.add_route('/api/peminjaman/scan', ScanBukuResource())
+app.add_route('/api/dashboard', DashboardResource())
 
 if __name__ == '__main__':
     from models.schema import *
