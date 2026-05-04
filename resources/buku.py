@@ -1,8 +1,9 @@
 import json
 import falcon
 import time
-from pony.orm import db_session, commit
+from pony.orm import db_session, commit, select
 from models.schema import Buku
+
 
 class BukuResource:
     @db_session
@@ -36,14 +37,36 @@ class BukuResource:
 
     @db_session
     def on_get(self, req, resp):
-        search = req.get_param('search')
-        if search:
-            query = select(b for b in Buku if search in b.judul_buku or search in b.barcode)
-        else:
-            query = Buku.select()
+        try:
+            search = req.get_param('search')
 
-        data = [b.to_dict() for b in query]
-        resp.media = data
+            # Pakai [:] adalah cara yang benar di Pony ORM untuk eksekusi query
+            if search:
+                query = select(b for b in Buku if search in b.judul_buku or search in b.barcode)[:]
+            else:
+                query = Buku.select()[:]
+
+            result = []
+            for b in query:
+                # Ambil data dict dari object Buku
+                item = b.to_dict()
+
+                # KONVERSI DECIMAL: Ini kunci biar gak Error 500 lagi
+                # Kita ubah semua field Decimal jadi float/int agar bisa jadi JSON
+                for key, value in item.items():
+                    if hasattr(value, '__visualize__') or str(type(value)) == "<class 'decimal.Decimal'>":
+                        item[key] = float(value)
+
+                result.append(item)
+
+            resp.media = result
+            resp.status = falcon.HTTP_200
+        except Exception as e:
+            # Biar lo bisa liat di terminal kalau ada error lain
+            print(f"Error Detail: {str(e)}")
+            resp.status = falcon.HTTP_500
+            resp.media = {"error": str(e)}
+
 
 class BukuDetailResource:
     @db_session
