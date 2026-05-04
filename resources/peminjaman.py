@@ -1,36 +1,58 @@
 import json
 import falcon
-from pony.orm import db_session, commit, select
+from datetime import datetime
+from pony.orm import db_session, commit, select, rollback
 from models.schema import Buku, Siswa, Peminjaman
-
+from pony.orm import db_session, rollback
 
 class PeminjamanResource:
     @db_session
     def on_get(self, req, resp):
+        rollback()
+
+        peminjamans = Peminjaman.select().order_by(lambda p: p.id)
         data = []
-        for p in Peminjaman.select().order_by(lambda: p.id):
+        for p in peminjamans:
             data.append({
                 "id": p.id,
                 "nama": p.siswa.nama,
+                "nis": p.siswa.nis,
                 "buku": p.buku.judul_buku,
+                "buku_id": p.buku.id,
                 "jumlah": p.jumlah,
-                "tgl_pinjam": p.tgl_pinjam,
-                "tgl_kembali": p.tgl_kembali,
+                "tgl_pinjam": p.tgl_pinjam.strftime("%Y-%m-%d") if isinstance(p.tgl_pinjam, datetime) else str(p.tgl_pinjam),
+                "tgl_kembali": p.tgl_kembali.strftime("%Y-%m-%d") if isinstance(p.tgl_kembali, datetime) else str(p.tgl_kembali),
                 "status": p.status
             })
-        resp.media = data
+
+        resp.status = falcon.HTTP_200
+        resp.text = json.dumps({"data": data})
 
     @db_session
     def on_post(self, req, resp):
         try:
             payload = json.loads(req.stream.read(req.content_length or 0))
 
-            siswa = Siswa.get(nis=payload['nis'])
-            buku = Buku.get(id=payload['buku_id'])
+            nis_input = str(payload['nis'])
+            buku_id_input = int(payload['buku_id'])
 
-            if not siswa or not buku:
+            siswa = Siswa.get(nis=nis_input)
+            buku = Buku.get(id=buku_id_input)
+
+            if not siswa:
                 resp.status = falcon.HTTP_404
-                resp.media = {"error": "Siswa atau Buku tidak ditemukan"}
+                resp.text = json.dumps({"error": f"Siswa dengan NIS {nis_input} tidak ditemukan"})
+                return
+
+            if not buku:
+                resp.status = falcon.HTTP_404
+                resp.text = json.dumps({"error": f"Buku dengan ID {buku_id_input} tidak ditemukan"})
+                return
+
+            jumlah_pinjam = int(payload.get('jumlah', 1))
+            if buku.stok < jumlah_pinjam:
+                resp.status = falcon.HTTP_400
+                resp.text = json.dumps({"error": "Stok buku tidak mencukupi!"})
                 return
 
             Peminjaman(
@@ -38,17 +60,20 @@ class PeminjamanResource:
                 buku=buku,
                 tgl_pinjam=payload['tgl_pinjam'],
                 tgl_kembali=payload['tgl_kembali'],
-                jumlah=payload.get('jumlah', 1),
+                jumlah=jumlah_pinjam,
                 status='Dipinjam'
             )
 
-            buku.stok -= int(payload.get('jumlah', 1))
-
+            buku.stok -= jumlah_pinjam
             commit()
-            resp.media = {"message": "Peminjaman berhasil disimpan!"}
+
+            resp.status = falcon.HTTP_201
+            resp.text = json.dumps({"message": "Peminjaman berhasil disimpan!"})
+
         except Exception as e:
+            rollback()
             resp.status = falcon.HTTP_400
-            resp.media = {"error": str(e)}
+            resp.text = json.dumps({"error": str(e)})
 
 
 class ScanBukuResource:
