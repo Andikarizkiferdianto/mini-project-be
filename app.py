@@ -24,6 +24,11 @@ from resources.jenis_pembayaran import JenisPembayaranResource, JenisPembayaranD
 from resources.buku import BukuResource, BukuDetailResource
 from resources.peminjaman import PeminjamanResource, ScanBukuResource, PeminjamanDetailResource
 from resources.dashboard_perpus import DashboardResource
+from resources.kenaikan_kelas import KenaikanKelasResource
+
+
+
+
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -67,6 +72,8 @@ app.add_route('/api/peminjaman', PeminjamanResource())
 app.add_route('/api/peminjaman/{p_id}', PeminjamanDetailResource())
 app.add_route('/api/peminjaman/scan', ScanBukuResource())
 app.add_route('/api/dashboard-perpus', DashboardResource())
+app.add_route('/api/kenaikan-kelas', KenaikanKelasResource())
+
 
 if __name__ == '__main__':
     from models.schema import *
