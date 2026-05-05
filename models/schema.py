@@ -170,7 +170,6 @@ class BayarTagihan(db.Entity):
     metode_pembayaran = Required(str)
     keterangan = Optional(str)
 
-
 class JenisPembayaran(db.Entity):
     _table_ = 'jenis_pembayaran'
     id = PrimaryKey(int, auto=True)
@@ -181,8 +180,8 @@ class JenisPembayaran(db.Entity):
     akun_hutang = Optional(str)
     tipe = Required(str)
     status = Required(str, default='aktif')
+    nominal_ketetapan = Required(float, default=0)
     tagihan_siswa = Set('BayarTagihan')
-
 
 class Buku(db.Entity):
     _table_ = 'buku'
@@ -209,3 +208,11 @@ class Peminjaman(db.Entity):
     tgl_aktual_kembali = Optional(date)
     status = Required(str, default="Dipinjam")
     jumlah = Required(int, default=1)
+
+class Belanja(db.Entity):
+    _table_ = 'belanja'
+    id = PrimaryKey(int, auto=True)
+    nama_item = Required(str)
+    nominal = Required(float)
+    tanggal = Required(datetime, default=lambda: datetime.now())
+    kategori = Required(str)
