@@ -30,6 +30,7 @@ from resources.pembayaran_siswa import CariSiswaResource, ListTahunAjaranResourc
 from resources.tunggakan_siswa import TunggakanSiswaResource, ListKelasResource
 from resources.tarif_pembayaran import TarifPembayaranOptionsResource, ListTarifSiswaResource
 from resources.rekap_pembayaran import RekapBulananResource
+from resources.data_transaksi import DataTransaksiResource
 
 
 cors = CORS(allow_all_origins=True,
@@ -84,6 +85,7 @@ app.add_route('/api/tunggakan/kelas', ListKelasResource())
 app.add_route('/api/tarif/options', TarifPembayaranOptionsResource())
 app.add_route('/api/tarif/list', ListTarifSiswaResource())
 app.add_route('/api/rekap/bulanan', RekapBulananResource())
+app.add_route('/api/transaksi/data', DataTransaksiResource())
 
 if __name__ == '__main__':
     from models.schema import *
