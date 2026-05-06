@@ -31,7 +31,13 @@ from resources.tunggakan_siswa import TunggakanSiswaResource, ListKelasResource
 from resources.tarif_pembayaran import TarifPembayaranOptionsResource, ListTarifSiswaResource
 from resources.rekap_pembayaran import RekapBulananResource
 from resources.data_transaksi import DataTransaksiResource
-
+from resources.teller import TellerResource, RiwayatTabunganResource, RiwayatTransaksiGlobalResource
+from resources.transaksi_penerimaan import TransaksiPenerimaanResource, TransaksiPenerimaanDetailResource
+from resources.jenis_penerimaan import JenisPenerimaanResource, JenisPenerimaanDetailResource
+from resources.laporan_penerimaan import LaporanPenerimaanResource
+from resources.transaksi_belanja import TransaksiBelanjaResource, TransaksiBelanjaDetailResource
+from resources.jenis_belanja import JenisBelanjaResource, JenisBelanjaDetailResource
+from resources.laporan_belanja import LaporanBelanjaResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -86,6 +92,19 @@ app.add_route('/api/tarif/options', TarifPembayaranOptionsResource())
 app.add_route('/api/tarif/list', ListTarifSiswaResource())
 app.add_route('/api/rekap/bulanan', RekapBulananResource())
 app.add_route('/api/transaksi/data', DataTransaksiResource())
+app.add_route('/api/tabungan/teller', TellerResource())
+app.add_route('/api/tabungan/riwayat', RiwayatTabunganResource())
+app.add_route('/api/tabungan/riwayat-global', RiwayatTransaksiGlobalResource())
+app.add_route('/api/penerimaan/transaksi', TransaksiPenerimaanResource())
+app.add_route('/api/penerimaan/transaksi/{id:int}', TransaksiPenerimaanDetailResource())
+app.add_route('/api/penerimaan/jenis', JenisPenerimaanResource())
+app.add_route('/api/penerimaan/jenis/{id:int}', JenisPenerimaanDetailResource())
+app.add_route('/api/penerimaan/laporan', LaporanPenerimaanResource())
+app.add_route('/api/belanja/transaksi', TransaksiBelanjaResource())
+app.add_route('/api/belanja/transaksi/{id:int}', TransaksiBelanjaDetailResource())
+app.add_route('/api/belanja/jenis', JenisBelanjaResource())
+app.add_route('/api/belanja/jenis/{id:int}', JenisBelanjaDetailResource())
+app.add_route('/api/belanja/laporan', LaporanBelanjaResource())
 
 if __name__ == '__main__':
     from models.schema import *
