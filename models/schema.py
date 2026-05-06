@@ -86,6 +86,7 @@ class Siswa(db.Entity):
     absensi = Set("Absensi")
     tagihan = Set('BayarTagihan')
     peminjaman = Set('Peminjaman')
+    tabungan = Set('Tabungan')
 
 
 class Absensi(db.Entity):
@@ -201,6 +202,7 @@ class Buku(db.Entity):
 
 class Peminjaman(db.Entity):
     _table_ = "peminjaman"
+    id = PrimaryKey(int, auto=True)
     siswa = Required(Siswa)
     buku = Required(Buku)
     tgl_pinjam = Required(date)
@@ -216,3 +218,56 @@ class Belanja(db.Entity):
     nominal = Required(float)
     tanggal = Required(datetime, default=lambda: datetime.now())
     kategori = Required(str)
+
+class Tabungan(db.Entity):
+    _table_ = "tabungan"
+    id = PrimaryKey(int, auto=True)
+    siswa = Required('Siswa')
+    tanggal = Required(datetime, default=lambda: datetime.now())
+    jenis_transaksi = Required(str)
+    nominal = Required(float)
+    keterangan = Optional(str)
+
+class Penerimaan(db.Entity):
+    _table_ = 'penerimaan'
+    id = PrimaryKey(int, auto=True)
+    jenis_penerimaan = Required(str)
+    sumber = Required(str)
+    nominal = Required(float)
+    tanggal = Required(date)
+    menyetujui = Optional(str)
+    keterangan = Optional(str)
+
+class JenisPenerimaan(db.Entity):
+    _table_ = 'jenis_penerimaan'
+    id = PrimaryKey(int, auto=True)
+    akun_harta = Required(str)
+    akun_pendapatan = Required(str)
+    kode_penerimaan = Required(str)
+    nama_akun = Required(str)
+    jenis = Required(str)
+    keterangan = Optional(str)
+    status = Required(str, default='Aktif')
+
+class TransaksiBelanja(db.Entity):
+    _table_ = 'transaksi_belanja'
+    id = PrimaryKey(int, auto=True)
+    jenis_belanja = Required(str)
+    bidang = Required(str)
+    penerima = Required(str)
+    sumber = Required(str)
+    tanggal = Required(datetime)
+    menyetujui = Required(str)
+    nominal = Required(float)
+    keterangan = Optional(str)
+
+class JenisBelanja(db.Entity):
+    _table_ = 'jenis_belanja'
+    id = PrimaryKey(int, auto=True)
+    akun_belanja = Required(str)
+    akun_harta = Required(str)
+    kode_akun = Required(str, unique=True)
+    nama_akun = Required(str)
+    jenis = Required(str)
+    keterangan = Optional(str)
+    status = Required(str, default='Aktif')
