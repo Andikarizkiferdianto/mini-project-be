@@ -38,6 +38,17 @@ from resources.laporan_penerimaan import LaporanPenerimaanResource
 from resources.transaksi_belanja import TransaksiBelanjaResource, TransaksiBelanjaDetailResource
 from resources.jenis_belanja import JenisBelanjaResource, JenisBelanjaDetailResource
 from resources.laporan_belanja import LaporanBelanjaResource
+from resources.transaksi_jurnal import TransaksiJurnalResource, AkunJurnalOptionResource
+from resources.laporan_jurnal import LaporanJurnalResource
+from resources.laporan_buku_besar import LaporanBukuBesarResource
+from resources.neraca_saldo import NeracaSaldoResource
+from resources.laporan_jurnal_umum import JurnalUmumResource
+from resources.penghasilan_komprehensif import PenghasilanKomprehensifResource
+from resources.posisi_keuangan import PosisiKeuanganResource
+from resources.arus_kas import ArusKasResource
+from resources.perubahan_aset_neto import PerubahanAsetNetoResource
+from resources.akun_budgeting import AkunBudgetingResource, OptionBudgetingResource
+from resources.akun_keuangan import AkunKeuanganResource, OptionKeuanganResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -105,6 +116,22 @@ app.add_route('/api/belanja/transaksi/{id:int}', TransaksiBelanjaDetailResource(
 app.add_route('/api/belanja/jenis', JenisBelanjaResource())
 app.add_route('/api/belanja/jenis/{id:int}', JenisBelanjaDetailResource())
 app.add_route('/api/belanja/laporan', LaporanBelanjaResource())
+app.add_route('/api/jurnal/transaksi', TransaksiJurnalResource())
+app.add_route('/api/jurnal/options', AkunJurnalOptionResource())
+app.add_route('/api/jurnal/laporan', LaporanJurnalResource())
+app.add_route('/api/jurnal/buku-besar', LaporanBukuBesarResource())
+app.add_route('/api/jurnal/neraca-saldo', NeracaSaldoResource())
+app.add_route('/api/jurnal/umum', JurnalUmumResource())
+app.add_route('/api/laporan/penghasilan-komprehensif', PenghasilanKomprehensifResource())
+app.add_route('/api/laporan/posisi-keuangan', PosisiKeuanganResource())
+app.add_route('/api/laporan/arus-kas', ArusKasResource())
+app.add_route('/api/laporan/perubahan-aset-neto', PerubahanAsetNetoResource())
+app.add_route('/api/budgeting', AkunBudgetingResource())
+app.add_route('/api/budgeting/{budget_id}', AkunBudgetingResource())
+app.add_route('/api/budgeting/options', OptionBudgetingResource())
+app.add_route('/api/akun-keuangan', AkunKeuanganResource())
+app.add_route('/api/akun-keuangan/{akun_id}', AkunKeuanganResource())
+app.add_route('/api/akun-keuangan/options', OptionKeuanganResource())
 
 if __name__ == '__main__':
     from models.schema import *
