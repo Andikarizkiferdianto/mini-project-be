@@ -271,3 +271,14 @@ class JenisBelanja(db.Entity):
     jenis = Required(str)
     keterangan = Optional(str)
     status = Required(str, default='Aktif')
+
+class Jurnal(db.Entity):
+    _table_ = 'jurnal'
+    id = PrimaryKey(int, auto=True)
+    tanggal = Required(date)
+    keterangan = Optional(str)
+    kode_akun = Required(str)
+    nama_akun = Required(str)
+    debet = Required(float, default=0)
+    kredit = Required(float, default=0)
+    status = Optional(str, default='Posting')
