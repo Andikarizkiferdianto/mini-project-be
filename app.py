@@ -49,6 +49,12 @@ from resources.arus_kas import ArusKasResource
 from resources.perubahan_aset_neto import PerubahanAsetNetoResource
 from resources.akun_budgeting import AkunBudgetingResource, OptionBudgetingResource
 from resources.akun_keuangan import AkunKeuanganResource, OptionKeuanganResource
+from resources.informasi_lembaga import InformasiLembagaResource
+from resources.banner_aplikasi import BannerAplikasiResource
+from resources.setting_user import SettingUserResource
+from resources.backup_data import BackupDataResource
+from resources.absensi_gps import AbsensiGpsResource
+from resources.dashboard_aplikasi import DashboardAplikasiResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -132,6 +138,15 @@ app.add_route('/api/budgeting/options', OptionBudgetingResource())
 app.add_route('/api/akun-keuangan', AkunKeuanganResource())
 app.add_route('/api/akun-keuangan/{akun_id}', AkunKeuanganResource())
 app.add_route('/api/akun-keuangan/options', OptionKeuanganResource())
+app.add_route('/api/informasi-lembaga', InformasiLembagaResource())
+app.add_route('/api/informasi-lembaga/{info_id}', InformasiLembagaResource())
+app.add_route('/api/banner-aplikasi', BannerAplikasiResource())
+app.add_route('/api/banner-aplikasi/{banner_id}', BannerAplikasiResource())
+app.add_route('/api/setting-user', SettingUserResource())
+app.add_route('/api/setting-user/options', SettingUserResource())
+app.add_route('/api/backup-data', BackupDataResource())
+app.add_route('/api/absensi-gps', AbsensiGpsResource())
+app.add_route('/api/dashboard-statistik', DashboardAplikasiResource())
 
 if __name__ == '__main__':
     from models.schema import *
