@@ -3,20 +3,35 @@ from models.schema import db
 from pony.orm import db_session
 
 class DashboardAplikasiResource:
+
     @db_session
     def on_get(self, req, resp):
-        """Ambil statistik ringkasan untuk dashboard"""
+
         try:
-            # 1. Hitung Total User (Siswa + Guru)
-            total_siswa = db.select("SELECT COUNT(*) FROM siswa")[0]
-            total_guru = db.select("SELECT COUNT(*) FROM guru")[0]
+            conn = db.get_connection()
+            cursor = conn.cursor()
+
+            # helper aman
+            def count_table(table):
+                try:
+                    cursor.execute(f"SELECT COUNT(*) FROM {table}")
+                    return cursor.fetchone()[0]
+                except:
+                    return 0
+
+            # USERS
+            cursor.execute("SELECT COUNT(*) FROM siswa")
+            total_siswa = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM guru")
+            total_guru = cursor.fetchone()[0]
+
             total_users = total_siswa + total_guru
 
-            total_banner = db.select("SELECT COUNT(*) FROM banner_aplikasi")[0]
-
-            total_info = db.select("SELECT COUNT(*) FROM informasi_lembaga")[0]
-
-            total_backup = db.select("SELECT COUNT(*) FROM riwayat_backup")[0]
+            # DASHBOARD ITEMS (AMAN)
+            total_banner = count_table("banner_aplikasi")
+            total_info = count_table("informasi_lembaga")
+            total_backup = count_table("riwayat_backup")
 
             resp.media = {
                 "status": "success",
@@ -27,6 +42,10 @@ class DashboardAplikasiResource:
                     "total_backup": total_backup
                 }
             }
+
         except Exception as e:
             resp.status = falcon.HTTP_500
-            resp.media = {"status": "error", "message": str(e)}
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
