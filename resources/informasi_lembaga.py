@@ -1,91 +1,186 @@
 import falcon
-from models.schema import db
 from pony.orm import db_session
+from models.schema import db
 from datetime import datetime
 import traceback
 
 
 class InformasiLembagaResource:
+
     @db_session
     def on_get(self, req, resp, info_id=None):
-        """Menampilkan List Informasi atau Detail per ID"""
+
         try:
+
+            conn = db.get_connection()
+            cursor = conn.cursor()
+
             if info_id:
-                # Ambil satu data berdasarkan ID
-                sql = "SELECT id, judul, isi, tanggal FROM informasi_lembaga WHERE id = $id"
-                row = db.select(sql, {"id": info_id})
+
+                cursor.execute("""
+                    SELECT id, judul, isi, tanggal
+                    FROM informasi_lembaga
+                    WHERE id=%s
+                """, [info_id])
+
+                row = cursor.fetchone()
 
                 if not row:
-                    resp.status = falcon.HTTP_404
-                    resp.media = {"status": "error", "message": "Data tidak ditemukan"}
+                    resp.media = {
+                        "status": "error",
+                        "message": "Data tidak ditemukan"
+                    }
                     return
 
-                r = row[0]
                 data = {
-                    "id": r[0],
-                    "judul": r[1],
-                    "isi": r[2],
-                    "tanggal": str(r[3])
+                    "id": row[0],
+                    "judul": row[1],
+                    "isi": row[2],
+                    "tanggal": str(row[3])
                 }
+
             else:
-                sql = "SELECT id, judul, isi, tanggal FROM informasi_lembaga ORDER BY id DESC"
-                result = db.select(sql)
+
+                cursor.execute("""
+                    SELECT id, judul, isi, tanggal
+                    FROM informasi_lembaga
+                    ORDER BY id DESC
+                """)
+
+                rows = cursor.fetchall()
+
                 data = []
-                for r in result:
+
+                for row in rows:
                     data.append({
-                        "id": r[0],
-                        "judul": r[1],
-                        "isi": r[2],
-                        "tanggal": str(r[3])
+                        "id": row[0],
+                        "judul": row[1],
+                        "isi": row[2],
+                        "tanggal": str(row[3])
                     })
 
-            resp.media = {"status": "success", "data": data}
+            resp.media = {
+                "status": "success",
+                "data": data
+            }
 
         except Exception as e:
+
             print(traceback.format_exc())
+
             resp.status = falcon.HTTP_500
-            resp.media = {"status": "error", "message": str(e)}
+
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
 
     @db_session
     def on_post(self, req, resp):
-        """Tambah Informasi Baru"""
-        raw_data = req.get_media()
+
         try:
-            sql = "INSERT INTO informasi_lembaga (judul, isi, tanggal) VALUES ($judul, $isi, $tgl)"
-            db.execute(sql, {
-                "judul": raw_data['judul'],
-                "isi": raw_data['isi'],
-                "tgl": raw_data.get('tanggal', datetime.now().date())
-            })
-            resp.media = {"status": "success", "message": "Informasi berhasil ditambahkan"}
+
+            raw_data = req.get_media()
+
+            conn = db.get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                INSERT INTO informasi_lembaga
+                (judul, isi, tanggal)
+                VALUES (%s, %s, %s)
+            """, (
+                raw_data['judul'],
+                raw_data['isi'],
+                raw_data['tanggal']
+            ))
+
+            conn.commit()
+
+            resp.media = {
+                "status": "success",
+                "message": "Informasi berhasil ditambahkan"
+            }
+
         except Exception as e:
+
+            print(traceback.format_exc())
+
             resp.status = falcon.HTTP_500
-            resp.media = {"status": "error", "message": str(e)}
+
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
 
     @db_session
     def on_put(self, req, resp, info_id):
-        """Edit/Update Informasi berdasarkan ID"""
-        raw_data = req.get_media()
+
         try:
-            sql = "UPDATE informasi_lembaga SET judul = $judul, isi = $isi, tanggal = $tgl WHERE id = $id"
-            db.execute(sql, {
-                "judul": raw_data['judul'],
-                "isi": raw_data['isi'],
-                "tgl": raw_data['tanggal'],
-                "id": info_id
-            })
-            resp.media = {"status": "success", "message": "Informasi berhasil diperbarui"}
+
+            raw_data = req.get_media()
+
+            conn = db.get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                UPDATE informasi_lembaga
+                SET judul=%s,
+                    isi=%s,
+                    tanggal=%s
+                WHERE id=%s
+            """, (
+                raw_data['judul'],
+                raw_data['isi'],
+                raw_data['tanggal'],
+                info_id
+            ))
+
+            conn.commit()
+
+            resp.media = {
+                "status": "success",
+                "message": "Informasi berhasil diupdate"
+            }
+
         except Exception as e:
+
+            print(traceback.format_exc())
+
             resp.status = falcon.HTTP_500
-            resp.media = {"status": "error", "message": str(e)}
+
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
 
     @db_session
     def on_delete(self, req, resp, info_id):
-        """Hapus Informasi berdasarkan ID"""
+
         try:
-            sql = "DELETE FROM informasi_lembaga WHERE id = $id"
-            db.execute(sql, {"id": info_id})
-            resp.media = {"status": "success", "message": "Informasi berhasil dihapus"}
+
+            conn = db.get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute(
+                "DELETE FROM informasi_lembaga WHERE id=%s",
+                [info_id]
+            )
+
+            conn.commit()
+
+            resp.media = {
+                "status": "success",
+                "message": "Informasi berhasil dihapus"
+            }
+
         except Exception as e:
+
+            print(traceback.format_exc())
+
             resp.status = falcon.HTTP_500
-            resp.media = {"status": "error", "message": str(e)}
+
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
