@@ -5,6 +5,7 @@ from falcon_cors import CORS
 from models.schema import db, AdminUser
 from pony.orm import db_session
 from waitress import serve
+import os
 
 from resources.siswa import SiswaResource, SiswaWithIdResource
 from resources.auth import AdminLoginResource
@@ -55,6 +56,23 @@ from resources.setting_user import SettingUserResource
 from resources.backup_data import BackupDataResource
 from resources.absensi_gps import AbsensiGpsResource
 from resources.dashboard_aplikasi import DashboardAplikasiResource
+from resources.profil_sekolah import ProfilSekolahResource
+from resources.inventaris_aset import InventarisAsetResource
+from resources.riwayat_aset import RiwayatAsetResource
+from resources.setting_lokasi import SettingLokasiResource
+from resources.setting_kategori import SettingKategoriResource
+from resources.surat_menyurat import SuratMenyuratResource
+from resources.dokumen_sekolah import DokumenSekolahResource
+from resources.kegiatan_sekolah import KegiatanSekolahResource
+from resources.dashboard_manajemen_sekolah import DashboardManajemenSekolahResource
+from resources.data_guru_dan_karyawan import DataGuruDanKaryawanResource
+from resources.kelola_indikator import KelolaIndikatorResource
+from resources.input_nilai_kinerja import InputNilaiKinerjaResource
+from resources.rekap_nilai_kinerja import RekapNilaiKinerjaResource
+from resources.manajemen_cuti import ManajemenCutiResource
+from resources.manajemen_izin import ManajemenIzinResource
+from resources.manajemen_lembur import ManajemenLemburResource
+from resources.rekap_absensi import RekapAbsensiResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -147,6 +165,26 @@ app.add_route('/api/setting-user/options', SettingUserResource())
 app.add_route('/api/backup-data', BackupDataResource())
 app.add_route('/api/absensi-gps', AbsensiGpsResource())
 app.add_route('/api/dashboard-statistik', DashboardAplikasiResource())
+app.add_route('/api/profil-sekolah', ProfilSekolahResource())
+app.add_static_route('/uploads', os.path.abspath('uploads'))
+app.add_route('/api/inventaris-aset', InventarisAsetResource())
+app.add_route('/api/riwayat-aset', RiwayatAsetResource())
+app.add_route('/api/setting-lokasi', SettingLokasiResource())
+app.add_route('/api/setting-kategori', SettingKategoriResource())
+app.add_route('/api/surat-menyurat', SuratMenyuratResource())
+app.add_route('/api/dokumen-sekolah', DokumenSekolahResource())
+app.add_route('/api/kegiatan-sekolah', KegiatanSekolahResource())
+app.add_route('/api/dashboard-manajemen-sekolah', DashboardManajemenSekolahResource())
+app.add_route('/api/data-guru-dan-karyawan', DataGuruDanKaryawanResource())
+app.add_route('/api/data-guru-dan-karyawan/{id_pegawai}', DataGuruDanKaryawanResource())
+app.add_route('/api/kelola-indikator', KelolaIndikatorResource())
+app.add_route('/api/kelola-indikator/{id_indikator}', KelolaIndikatorResource())
+app.add_route('/api/input-nilai-kinerja', InputNilaiKinerjaResource())
+app.add_route('/api/rekap-nilai-kinerja', RekapNilaiKinerjaResource())
+app.add_route('/api/manajemen-cuti', ManajemenCutiResource())
+app.add_route('/api/manajemen-izin', ManajemenIzinResource())
+app.add_route('/api/manajemen-lembur', ManajemenLemburResource())
+app.add_route('/api/rekap-absensi', RekapAbsensiResource())
 
 if __name__ == '__main__':
     from models.schema import *

@@ -1,5 +1,6 @@
 from pony.orm import *
 from datetime import datetime, date
+from datetime import time as time_type
 import decimal
 
 db = Database()
@@ -282,3 +283,39 @@ class Jurnal(db.Entity):
     debet = Required(float, default=0)
     kredit = Required(float, default=0)
     status = Optional(str, default='Posting')
+
+class NilaiKinerja(db.Entity):
+    _table_ = 'nilai_kinerja'
+    id_guru_pegawai = Required(int)
+    id_indikator = Required(int)
+    bulan = Required(str)
+    tahun = Required(int)
+    nilai = Required(float)
+
+class LogCuti(db.Entity):
+    _table_ = 'log_cuti'
+    id = PrimaryKey(int, auto=True)
+    id_guru_pegawai = Required(int)
+    tanggal_mulai = Required(date)
+    tanggal_selesai = Required(date)
+    alasan = Optional(str, lazy=False)
+    status = Required(str, default='Pending')
+
+class LogIzin(db.Entity):
+    _table_ = 'log_izin'
+    id = PrimaryKey(int, auto=True)
+    id_guru_pegawai = Required(int)
+    tanggal = Required(date)
+    jenis_izin = Required(str)
+    keterangan = Optional(str, lazy=False)
+    status = Required(str, default='Pending')
+
+class LogLembur(db.Entity):
+    _table_ = 'log_lembur'
+    id = PrimaryKey(int, auto=True)
+    id_guru_pegawai = Required(int)
+    tanggal = Required(date)
+    jam_mulai = Required(time_type)
+    jam_selesai = Required(time_type)
+    kegiatan = Optional(str, lazy=False)
+    status = Required(str, default='Pending')
