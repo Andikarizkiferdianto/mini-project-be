@@ -9,6 +9,7 @@ class SiswaResource:
 
     @db_session
     def on_get(self, req, resp):
+
         rollback()
 
         kelas = req.get_param("kelas")
@@ -31,6 +32,7 @@ class SiswaResource:
         data = []
 
         for s in query:
+
             data.append({
                 "id": s.id,
                 "nis": s.nis,
@@ -65,17 +67,32 @@ class SiswaResource:
             })
 
         resp.status = falcon.HTTP_200
+
         resp.text = json.dumps({
             "data": data
         })
 
     @db_session
     def on_post(self, req, resp):
+
         try:
-            payload = json.loads(req.stream.read(req.content_length or 0))
+
+            payload = json.loads(
+                req.stream.read(req.content_length or 0)
+            )
+
+            # VALIDASI NIS DUPLIKAT
+            cek_nis = Siswa.get(
+                nis=payload.get('nis')
+            )
+
+            if cek_nis:
+                raise Exception("NIS sudah digunakan!")
 
             tgl_lahir_obj = None
+
             if payload.get('tgl_lahir'):
+
                 tgl_lahir_obj = datetime.strptime(
                     payload.get('tgl_lahir'),
                     '%Y-%m-%d'
@@ -90,30 +107,81 @@ class SiswaResource:
             ) if payload.get('id_jurusan') else None
 
             Siswa(
+
                 nis=payload.get('nis'),
                 nisn=payload.get('nisn', ''),
                 nama=payload.get('nama'),
-                tempat_lahir=payload.get('tempat_lahir', ''),
+
+                tempat_lahir=payload.get(
+                    'tempat_lahir',
+                    ''
+                ),
+
                 tgl_lahir=tgl_lahir_obj,
-                jenis_kelamin=payload.get('jenis_kelamin', ''),
+
+                jenis_kelamin=payload.get(
+                    'jenis_kelamin',
+                    ''
+                ),
+
                 alamat=payload.get('alamat', ''),
                 agama=payload.get('agama', ''),
-                golongan_darah=payload.get('golongan_darah', ''),
-                tahun_ajaran=payload.get('tahun_ajaran', ''),
-                tahun_masuk=payload.get('tahun_masuk', ''),
-                sekolah_asal=payload.get('sekolah_asal', ''),
+
+                golongan_darah=payload.get(
+                    'golongan_darah',
+                    ''
+                ),
+
+                tahun_ajaran=payload.get(
+                    'tahun_ajaran',
+                    ''
+                ),
+
+                tahun_masuk=payload.get(
+                    'tahun_masuk',
+                    ''
+                ),
+
+                sekolah_asal=payload.get(
+                    'sekolah_asal',
+                    ''
+                ),
+
                 no_hp=payload.get('no_hp', ''),
 
-                nama_ayah=payload.get('nama_ayah', ''),
-                pekerjaan_ayah=payload.get('pekerjaan_ayah', ''),
-                no_hp_ayah=payload.get('no_hp_ayah', ''),
+                nama_ayah=payload.get(
+                    'nama_ayah',
+                    ''
+                ),
 
-                nama_ibu=payload.get('nama_ibu', ''),
-                pekerjaan_ibu=payload.get('pekerjaan_ibu', ''),
-                no_hp_ibu=payload.get('no_hp_ibu', ''),
+                pekerjaan_ayah=payload.get(
+                    'pekerjaan_ayah',
+                    ''
+                ),
 
-                status_aktif=str(
-                    payload.get('status_aktif', 'Aktif')
+                no_hp_ayah=payload.get(
+                    'no_hp_ayah',
+                    ''
+                ),
+
+                nama_ibu=payload.get(
+                    'nama_ibu',
+                    ''
+                ),
+
+                pekerjaan_ibu=payload.get(
+                    'pekerjaan_ibu',
+                    ''
+                ),
+
+                no_hp_ibu=payload.get(
+                    'no_hp_ibu',
+                    ''
+                ),
+
+                status_aktif=payload.get(
+                    'status_aktif',
+                    'Aktif'
                 ),
 
                 kelas=kelas_obj,
@@ -123,14 +191,20 @@ class SiswaResource:
             commit()
 
             resp.status = falcon.HTTP_201
+
             resp.text = json.dumps({
                 "message": "Siswa berhasil ditambahkan!"
             })
 
         except Exception as e:
+
             rollback()
 
+            import traceback
+            traceback.print_exc()
+
             resp.status = falcon.HTTP_400
+
             resp.text = json.dumps({
                 "message": f"Gagal simpan: {str(e)}"
             })
@@ -140,16 +214,21 @@ class SiswaWithIdResource:
 
     @db_session
     def on_get(self, req, resp, siswa_id):
+
         siswa = Siswa.get(id=siswa_id)
 
         if not siswa:
+
             resp.status = falcon.HTTP_404
+
             resp.text = json.dumps({
                 "message": "Siswa tidak ditemukan!"
             })
+
             return
 
         resp.status = falcon.HTTP_200
+
         resp.text = json.dumps({
             "data": {
                 "id": siswa.id,
@@ -187,117 +266,189 @@ class SiswaWithIdResource:
 
     @db_session
     def on_put(self, req, resp, siswa_id):
+
         try:
-            payload = json.loads(req.stream.read(req.content_length or 0))
+
+            payload = json.loads(
+                req.stream.read(req.content_length or 0)
+            )
 
             siswa = Siswa.get(id=siswa_id)
 
             if not siswa:
+
                 resp.status = falcon.HTTP_404
+
                 resp.text = json.dumps({
                     "message": "Siswa tidak ditemukan!"
                 })
+
                 return
 
-            if 'nis' in payload:
-                siswa.nis = payload['nis']
+            # VALIDASI NIS DUPLIKAT
+            cek_nis = Siswa.get(
+                lambda s:
+                s.nis == payload.get('nis')
+                and s.id != siswa_id
+            )
 
-            if 'nisn' in payload:
-                siswa.nisn = payload['nisn']
+            if cek_nis:
+                raise Exception("NIS sudah digunakan!")
 
-            if 'nama' in payload:
-                siswa.nama = payload['nama']
+            # TANGGAL LAHIR
+            if payload.get('tgl_lahir'):
 
-            if 'tempat_lahir' in payload:
-                siswa.tempat_lahir = payload['tempat_lahir']
-
-            if 'tgl_lahir' in payload and payload['tgl_lahir']:
                 siswa.tgl_lahir = datetime.strptime(
-                    payload['tgl_lahir'],
+                    payload.get('tgl_lahir'),
                     '%Y-%m-%d'
                 )
 
-            if 'jenis_kelamin' in payload:
-                siswa.jenis_kelamin = payload['jenis_kelamin']
+            # RELASI
+            kelas_obj = Kelas.get(
+                id=payload.get('id_kelas')
+            ) if payload.get('id_kelas') else None
 
-            if 'alamat' in payload:
-                siswa.alamat = payload['alamat']
+            jurusan_obj = Jurusan.get(
+                id=payload.get('id_jurusan')
+            ) if payload.get('id_jurusan') else None
 
-            if 'agama' in payload:
-                siswa.agama = payload['agama']
+            # UPDATE
+            siswa.nis = payload.get('nis')
+            siswa.nisn = payload.get('nisn', '')
+            siswa.nama = payload.get('nama')
 
-            if 'golongan_darah' in payload:
-                siswa.golongan_darah = payload['golongan_darah']
+            siswa.tempat_lahir = payload.get(
+                'tempat_lahir',
+                ''
+            )
 
-            if 'tahun_ajaran' in payload:
-                siswa.tahun_ajaran = payload['tahun_ajaran']
+            siswa.jenis_kelamin = payload.get(
+                'jenis_kelamin',
+                ''
+            )
 
-            if 'tahun_masuk' in payload:
-                siswa.tahun_masuk = payload['tahun_masuk']
+            siswa.alamat = payload.get('alamat', '')
+            siswa.agama = payload.get('agama', '')
 
-            if 'sekolah_asal' in payload:
-                siswa.sekolah_asal = payload['sekolah_asal']
+            siswa.golongan_darah = payload.get(
+                'golongan_darah',
+                ''
+            )
 
-            if 'no_hp' in payload:
-                siswa.no_hp = payload['no_hp']
+            siswa.tahun_ajaran = payload.get(
+                'tahun_ajaran',
+                ''
+            )
 
-            if 'nama_ayah' in payload:
-                siswa.nama_ayah = payload['nama_ayah']
+            siswa.tahun_masuk = payload.get(
+                'tahun_masuk',
+                ''
+            )
 
-            if 'pekerjaan_ayah' in payload:
-                siswa.pekerjaan_ayah = payload['pekerjaan_ayah']
+            siswa.sekolah_asal = payload.get(
+                'sekolah_asal',
+                ''
+            )
 
-            if 'no_hp_ayah' in payload:
-                siswa.no_hp_ayah = payload['no_hp_ayah']
+            siswa.no_hp = payload.get('no_hp', '')
 
-            if 'nama_ibu' in payload:
-                siswa.nama_ibu = payload['nama_ibu']
+            siswa.nama_ayah = payload.get(
+                'nama_ayah',
+                ''
+            )
 
-            if 'pekerjaan_ibu' in payload:
-                siswa.pekerjaan_ibu = payload['pekerjaan_ibu']
+            siswa.pekerjaan_ayah = payload.get(
+                'pekerjaan_ayah',
+                ''
+            )
 
-            if 'no_hp_ibu' in payload:
-                siswa.no_hp_ibu = payload['no_hp_ibu']
+            siswa.no_hp_ayah = payload.get(
+                'no_hp_ayah',
+                ''
+            )
 
-            if 'id_kelas' in payload:
-                siswa.kelas = Kelas.get(id=payload['id_kelas'])
+            siswa.nama_ibu = payload.get(
+                'nama_ibu',
+                ''
+            )
 
-            if 'id_jurusan' in payload:
-                siswa.jurusan = Jurusan.get(id=payload['id_jurusan'])
+            siswa.pekerjaan_ibu = payload.get(
+                'pekerjaan_ibu',
+                ''
+            )
 
-            if 'status_aktif' in payload:
-                siswa.status_aktif = payload['status_aktif']
+            siswa.no_hp_ibu = payload.get(
+                'no_hp_ibu',
+                ''
+            )
+
+            siswa.status_aktif = payload.get(
+                'status_aktif',
+                'Aktif'
+            )
+
+            siswa.kelas = kelas_obj
+            siswa.jurusan = jurusan_obj
 
             commit()
 
             resp.status = falcon.HTTP_200
+
             resp.text = json.dumps({
                 "message": f"Data {siswa.nama} berhasil diupdate!"
             })
 
         except Exception as e:
+
             rollback()
 
+            import traceback
+            traceback.print_exc()
+
             resp.status = falcon.HTTP_400
+
             resp.text = json.dumps({
                 "message": f"Gagal update: {str(e)}"
             })
 
     @db_session
     def on_delete(self, req, resp, siswa_id):
-        siswa = Siswa.get(id=siswa_id)
 
-        if not siswa:
-            resp.status = falcon.HTTP_404
+        try:
+
+            siswa = Siswa.get(id=siswa_id)
+
+            if not siswa:
+
+                resp.status = falcon.HTTP_404
+
+                resp.text = json.dumps({
+                    "message": "Siswa tidak ditemukan!"
+                })
+
+                return
+
+            nama_siswa = siswa.nama
+
+            siswa.delete()
+
+            commit()
+
+            resp.status = falcon.HTTP_200
+
             resp.text = json.dumps({
-                "message": "Siswa tidak ditemukan!"
+                "message": f"{nama_siswa} berhasil dihapus!"
             })
-            return
 
-        siswa.delete()
-        commit()
+        except Exception as e:
 
-        resp.status = falcon.HTTP_200
-        resp.text = json.dumps({
-            "message": "Berhasil hapus"
-        })
+            rollback()
+
+            import traceback
+            traceback.print_exc()
+
+            resp.status = falcon.HTTP_400
+
+            resp.text = json.dumps({
+                "message": f"Gagal hapus: {str(e)}"
+            })

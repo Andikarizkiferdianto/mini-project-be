@@ -8,24 +8,45 @@ class SettingUserResource:
 
     @db_session
     def on_get(self, req, resp):
+
         try:
-            # FIX: pakai execute (bukan select string)
-            kelas = db.execute("SELECT id, nama_kelas FROM kelas")
+
+            kelas = db.execute("""
+                SELECT id, nama_kelas
+                FROM kelas
+            """)
 
             resp.media = {
                 "status": "success",
                 "options": {
-                    "kelas": [{"id": k[0], "nama": k[1]} for k in kelas],
-                    "jenis_user": ["Siswa", "Guru", "Wali Kelas", "Orang Tua"]
+                    "kelas": [
+                        {
+                            "id": k[0],
+                            "nama": k[1]
+                        } for k in kelas
+                    ],
+
+                    "jenis_user": [
+                        "Siswa",
+                        "Guru",
+                        "Wali Kelas",
+                        "Orang Tua"
+                    ]
                 }
             }
 
         except Exception as e:
-            print("ERROR ON_GET:", traceback.format_exc())
+
+            print(
+                "ERROR ON_GET:",
+                traceback.format_exc()
+            )
+
             resp.status = falcon.HTTP_500
+
             resp.media = {
                 "status": "error",
-                "options": {  # penting: biar frontend tidak crash
+                "options": {
                     "kelas": [],
                     "jenis_user": []
                 },
@@ -34,25 +55,38 @@ class SettingUserResource:
 
     @db_session
     def on_post(self, req, resp):
+
         try:
+
             raw = req.get_media()
+
             jenis = raw.get("jenis_user")
             kelas_id = raw.get("kelas_id")
 
             data = []
 
+            # SISWA
             if jenis == "Siswa":
 
                 if kelas_id:
+
                     siswa_list = db.execute("""
                         SELECT id, nisn, nama
                         FROM siswa
-                        WHERE id_kelas = $id_kelas
-                    """, {"id_kelas": kelas_id})
+                        WHERE kelas = $kelas_id
+                    """, {
+                        "kelas_id": int(kelas_id)
+                    })
+
                 else:
-                    siswa_list = db.execute("SELECT id, nisn, nama FROM siswa")
+
+                    siswa_list = db.execute("""
+                        SELECT id, nisn, nama
+                        FROM siswa
+                    """)
 
                 for s in siswa_list:
+
                     data.append({
                         "id": s[0],
                         "nis_id": s[1],
@@ -61,10 +95,16 @@ class SettingUserResource:
                         "password": ""
                     })
 
+            # GURU
             else:
-                guru_list = db.execute("SELECT id, nip, nama FROM guru")
+
+                guru_list = db.execute("""
+                    SELECT id, nip, nama
+                    FROM guru
+                """)
 
                 for g in guru_list:
+
                     data.append({
                         "id": g[0],
                         "nis_id": g[1],
@@ -73,9 +113,22 @@ class SettingUserResource:
                         "password": ""
                     })
 
-            resp.media = {"status": "success", "data": data}
+            resp.media = {
+                "status": "success",
+                "data": data
+            }
 
         except Exception as e:
-            print("ERROR ON_POST:", traceback.format_exc())
+
+            print(
+                "ERROR ON_POST:",
+                traceback.format_exc()
+            )
+
             resp.status = falcon.HTTP_500
-            resp.media = {"status": "error", "data": []}
+
+            resp.media = {
+                "status": "error",
+                "data": [],
+                "message": str(e)
+            }

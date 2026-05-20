@@ -1,5 +1,6 @@
 import falcon
 import pymysql
+
 pymysql.install_as_MySQLdb()
 from falcon_cors import CORS
 from models.schema import db, AdminUser
@@ -40,7 +41,7 @@ from resources.transaksi_belanja import TransaksiBelanjaResource, TransaksiBelan
 from resources.jenis_belanja import JenisBelanjaResource, JenisBelanjaDetailResource
 from resources.laporan_belanja import LaporanBelanjaResource
 from resources.transaksi_jurnal import TransaksiJurnalResource, AkunJurnalOptionResource
-from resources.laporan_jurnal import LaporanJurnalResource
+from resources.laporan_jurnal import LaporanJurnalResource, LaporanJurnalResource, LaporanJurnalDetailResource
 from resources.laporan_buku_besar import LaporanBukuBesarResource
 from resources.neraca_saldo import NeracaSaldoResource
 from resources.laporan_jurnal_umum import JurnalUmumResource
@@ -143,6 +144,7 @@ app.add_route('/api/belanja/laporan', LaporanBelanjaResource())
 app.add_route('/api/jurnal/transaksi', TransaksiJurnalResource())
 app.add_route('/api/jurnal/options', AkunJurnalOptionResource())
 app.add_route('/api/jurnal/laporan', LaporanJurnalResource())
+app.add_route('/api/jurnal/laporan/{jurnal_id:int}', LaporanJurnalDetailResource())
 app.add_route('/api/jurnal/buku-besar', LaporanBukuBesarResource())
 app.add_route('/api/jurnal/neraca-saldo', NeracaSaldoResource())
 app.add_route('/api/jurnal/umum', JurnalUmumResource())
