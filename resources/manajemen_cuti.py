@@ -4,91 +4,182 @@ from pony.orm import db_session
 
 
 class ManajemenCutiResource:
+
     @db_session
-    def on_get(self, req, resp):
-        """Mengambil data pengajuan cuti, izin, atau lembur dengan filter dinamis"""
-        id_pegawai = req.get_param('id_pegawai')
-        status_filter = req.get_param('status')
+    def on_get(self, req, resp, id_cuti=None):
 
         try:
+
+            id_pegawai = req.get_param('id_pegawai')
+            status = req.get_param('status')
+
             sql = """
-                c.id,
-                p.nama AS nama_pegawai,
-                c.tanggal_mulai,
-                c.tanggal_selesai,
-                c.alasan,
-                c.status
-                FROM log_cuti c
-                JOIN guru_pegawai p ON c.id_guru_pegawai = p.id
-                WHERE 1=1
+                SELECT
+                    lc.id,
+                    gp.nama,
+                    lc.tanggal_mulai,
+                    lc.tanggal_selesai,
+                    lc.alasan,
+                    lc.status,
+                    lc.id_guru_pegawai
+                FROM log_cuti lc
+                LEFT JOIN guru_pegawai gp
+                    ON lc.id_guru_pegawai = gp.id
             """
-            params = {}
+
+            kondisi = []
 
             if id_pegawai:
-                sql += " AND c.id_guru_pegawai = $id_pegawai"
-                params['id_pegawai'] = int(id_pegawai)
+                kondisi.append(f"lc.id_guru_pegawai = {int(id_pegawai)}")
 
-            if status_filter:
-                sql += " AND UPPER(c.status) = $status_filter"
-                params['status_filter'] = status_filter.strip().upper()
+            if status:
+                kondisi.append(f"lc.status = '{status}'")
 
-            sql += " ORDER BY c.id DESC"
+            if kondisi:
+                sql += " WHERE " + " AND ".join(kondisi)
 
-            raw_data = db.select(sql, params)
+            sql += " ORDER BY lc.id DESC"
 
-            list_cuti = []
-            for idx, row in enumerate(raw_data, start=1):
-                list_cuti.append({
-                    "no": idx,
-                    "id": row[0],
-                    "nama_pegawai": row[1],
-                    "tanggal_mulai": str(row[2]),
-                    "tanggal_selesai": str(row[3]),
-                    "alasan": row[4],
-                    "status": row[5]
+            conn = db.get_connection()
+            cursor = conn.cursor()
+
+            cursor.execute(sql)
+
+            raw_data = cursor.fetchall()
+
+            data = []
+
+            for r in raw_data:
+                data.append({
+                    "id": r[0],
+                    "nama_pegawai": r[1],
+                    "tanggal_mulai": str(r[2]),
+                    "tanggal_selesai": str(r[3]),
+                    "alasan": r[4],
+                    "status": r[5],
+                    "id_guru_pegawai": r[6]
                 })
 
             resp.media = {
                 "status": "success",
-                "data": list_cuti
+                "data": data
             }
+
         except Exception as e:
+
             resp.status = falcon.HTTP_500
-            resp.media = {"status": "error", "message": f"Gagal mengambil data cuti: {str(e)}"}
+
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
 
     @db_session
     def on_post(self, req, resp):
-        """Menyimpan pengajuan cuti baru dari form modal"""
+
         try:
-            raw_data = req.get_media()
 
-            id_guru_pegawai = raw_data.get('id_guru_pegawai')
-            tanggal_mulai = raw_data.get('tanggal_mulai')
-            tanggal_selesai = raw_data.get('tanggal_selesai')
-            alasan = raw_data.get('alasan', '')
+            data = req.get_media()
 
-            if not id_guru_pegawai or not tanggal_mulai or not tanggal_selesai:
-                resp.status = falcon.HTTP_400
-                resp.media = {"status": "error",
-                              "message": "Data nama pegawai, tanggal mulai, dan tanggal selesai wajib diisi!"}
-                return
-
-            sql_insert = """
-                INSERT INTO log_cuti (id_guru_pegawai, tanggal_mulai, tanggal_selesai, alasan, status)
-                VALUES ($id_pegawai, $tgl_mulai, $tgl_selesai, $alasan, 'Pending')
+            sql = """
+                INSERT INTO log_cuti
+                (
+                    id_guru_pegawai,
+                    tanggal_mulai,
+                    tanggal_selesai,
+                    alasan,
+                    status
+                )
+                VALUES
+                (
+                    $id_guru_pegawai,
+                    $tanggal_mulai,
+                    $tanggal_selesai,
+                    $alasan,
+                    'Pending'
+                )
             """
 
-            db.execute(sql_insert, {
-                "id_pegawai": int(id_guru_pegawai),
-                "tgl_mulai": tanggal_mulai,
-                "tgl_selesai": tanggal_selesai,
-                "alasan": alasan
+            db.execute(sql, {
+                "id_guru_pegawai": int(data['id_guru_pegawai']),
+                "tanggal_mulai": data['tanggal_mulai'],
+                "tanggal_selesai": data['tanggal_selesai'],
+                "alasan": data.get('alasan', '')
             })
 
             resp.media = {
                 "status": "success",
-                "message": "Pengajuan cuti/izin berhasil dikirim!"
+                "message": "Data cuti berhasil ditambahkan"
             }
+
         except Exception as e:
+
             resp.status = falcon.HTTP_500
-            resp.media = {"status": "error", "message": f"Gagal memproses pengajuan cuti: {str(e)}"}
+
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
+
+    @db_session
+    def on_put(self, req, resp, id_cuti):
+
+        try:
+
+            data = req.get_media()
+
+            sql = """
+                UPDATE log_cuti
+                SET
+                    id_guru_pegawai = $id_guru_pegawai,
+                    tanggal_mulai = $tanggal_mulai,
+                    tanggal_selesai = $tanggal_selesai,
+                    alasan = $alasan
+                WHERE id = $id
+            """
+
+            db.execute(sql, {
+                "id": int(id_cuti),
+                "id_guru_pegawai": int(data['id_guru_pegawai']),
+                "tanggal_mulai": data['tanggal_mulai'],
+                "tanggal_selesai": data['tanggal_selesai'],
+                "alasan": data.get('alasan', '')
+            })
+
+            resp.media = {
+                "status": "success",
+                "message": "Data berhasil diupdate"
+            }
+
+        except Exception as e:
+
+            resp.status = falcon.HTTP_500
+
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
+
+    @db_session
+    def on_delete(self, req, resp, id_cuti):
+
+        try:
+
+            db.execute(
+                "DELETE FROM log_cuti WHERE id = $id",
+                {"id": int(id_cuti)}
+            )
+
+            resp.media = {
+                "status": "success",
+                "message": "Data berhasil dihapus"
+            }
+
+        except Exception as e:
+
+            resp.status = falcon.HTTP_500
+
+            resp.media = {
+                "status": "error",
+                "message": str(e)
+            }
