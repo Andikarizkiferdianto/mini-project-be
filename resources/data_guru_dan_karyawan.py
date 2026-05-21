@@ -25,25 +25,20 @@ class DataGuruDanKaryawanResource:
                 }
                 return
 
+            # Ambil parameter tipe query string (?tipe=GURU atau ?tipe=PEGAWAI)
             tipe = req.get_param('tipe')
             if tipe:
-                sql = "SELECT id, tipe, nama, nip, jabatan, no_hp, email, status FROM guru_pegawai WHERE tipe = $tipe ORDER BY id ASC"
-                result = db.select(sql, {"tipe": tipe.upper()})
+                sql = "SELECT id, tipe, nama, nip, jabatan, no_hp, email, status FROM guru_pegawai WHERE LOWER(tipe) = LOWER($tipe) ORDER BY id DESC"
+                result = db.select(sql, {"tipe": tipe})
             else:
-                sql = "SELECT id, tipe, nama, nip, jabatan, no_hp, email, status FROM guru_pegawai ORDER BY id ASC"
+                sql = "SELECT id, tipe, nama, nip, jabatan, no_hp, email, status FROM guru_pegawai ORDER BY id DESC"
                 result = db.select(sql)
 
             data = []
             for r in result:
                 data.append({
-                    "id": r[0],
-                    "tipe": r[1],
-                    "nama": r[2],
-                    "nip": r[3],
-                    "jabatan": r[4],
-                    "no_hp": r[5],
-                    "email": r[6],
-                    "status": r[7]
+                    "id": r[0], "tipe": r[1], "nama": r[2], "nip": r[3],
+                    "jabatan": r[4], "no_hp": r[5], "email": r[6], "status": r[7]
                 })
             resp.media = {"status": "success", "data": data}
         except Exception as e:
@@ -55,7 +50,6 @@ class DataGuruDanKaryawanResource:
         """Tambah data Guru / Karyawan baru"""
         try:
             raw_data = req.get_media()
-
             sql = """
                 INSERT INTO guru_pegawai (tipe, nama, nip, jabatan, no_hp, email, status)
                 VALUES ($tipe, $nama, $nip, $jabatan, $no_hp, $email, $status)
@@ -84,13 +78,12 @@ class DataGuruDanKaryawanResource:
 
         try:
             raw_data = req.get_media()
-
             sql = """
-                    UPDATE guru_pegawai 
-                    SET tipe = $tipe, nama = $nama, nip = $nip, jabatan = $jabatan, 
-                        no_hp = $no_hp, email = $email, status = $status 
-                    WHERE id = $id
-                """
+                UPDATE guru_pegawai 
+                SET tipe = $tipe, nama = $nama, nip = $nip, jabatan = $jabatan, 
+                    no_hp = $no_hp, email = $email, status = $status 
+                WHERE id = $id
+            """
             db.execute(sql, {
                 "id": int(id_pegawai),
                 "tipe": raw_data.get('tipe').upper(),

@@ -6,48 +6,42 @@ from pony.orm import db_session
 class RekapNilaiKinerjaResource:
     @db_session
     def on_get(self, req, resp):
-        """Ambil data rekapitulasi nilai kinerja berbentuk flat array untuk Datatables"""
-        tipe = req.get_param('tipe', default='GURU').strip().upper()
-        bulan = req.get_param('bulan', default='May').strip()
-        tahun = req.get_param('tahun', default='2026').strip()
+        tipe = req.get_param('tipe', default='GURU').upper()
+        bulan = req.get_param('bulan', default='Mei')
+        tahun = int(req.get_param('tahun', default='2026'))
 
         try:
-            sql_indikator = "SELECT id, nama_indikator FROM setting_indikator ORDER BY urutan ASC"
-            indikators = db.select(sql_indikator)
+            # 1. Ambil indikator tanpa ORDER BY urutan (agar tidak error)
+            # Pastikan nama kolom di bawah ini SAMA PERSIS dengan di database kamu
+            indikators = db.select("SELECT id, nama_indikator FROM setting_indikator")
 
-            sql_pegawai = "SELECT id, nama FROM guru_pegawai WHERE UPPER(tipe) = $tipe ORDER BY id ASC"
-            pegawais = db.select(sql_pegawai)
+            # 2. Ambil pegawai
+            pegawais = db.select("SELECT id, nama FROM guru_pegawai WHERE UPPER(tipe) = $tipe")
 
-            sql_nilai = "SELECT id_guru_pegawai, id_indikator, nilai FROM nilai_kinerja WHERE bulan = $bulan AND tahun = $tahun"
-            nilai_list = db.select(sql_nilai, {"bulan": bulan, "tahun": int(tahun)})
+            # 3. Ambil nilai
+            nilai_list = db.select(
+                "SELECT id_guru_pegawai, id_indikator, nilai FROM nilai_kinerja WHERE bulan = $bulan AND tahun = $tahun",
+                {"bulan": bulan, "tahun": tahun})
 
-            map_nilai = {(n[0], n[1]): float(n[2]) for n in nilai_list}
+            # Mapping nilai
+            map_nilai = {(n[0], n[1]): n[2] for n in nilai_list}
 
             rekap_data = []
-            for idx, p in enumerate(pegawais, start=1):
-                id_guru = p[0]
-                nama_guru = p[1]
-
-                row = {
-                    "no": idx,
-                    "nama_guru": nama_guru
-                }
-
+            for p in pegawais:
+                row = {"no": len(rekap_data) + 1, "nama_guru": p[1]}
+                total = 0
+                count = 0
                 for ind in indikators:
-                    id_ind = ind[0]
-                    nama_ind_key = ind[1].lower().replace(" ", "_").replace("&", "dan")
-
-                    nilai_v = map_nilai.get((id_guru, id_ind), "-")
-                    row[nama_ind_key] = nilai_v
-
+                    val = map_nilai.get((p[0], ind[0]), 0)
+                    row[f"ind_{ind[0]}"] = val
+                    total += int(val)
+                    count += 1
+                row["rata_rata"] = round(total / count, 1) if count > 0 else 0
                 rekap_data.append(row)
-
-            list_header = [{"title": ind[1], "data": ind[1].lower().replace(" ", "_").replace("&", "dan")} for ind in
-                           indikators]
 
             resp.media = {
                 "status": "success",
-                "headers": list_header,
+                "headers": [{"id": i[0], "title": i[1]} for i in indikators],
                 "data": rekap_data
             }
         except Exception as e:
