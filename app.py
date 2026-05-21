@@ -74,6 +74,7 @@ from resources.manajemen_cuti import ManajemenCutiResource
 from resources.manajemen_izin import ManajemenIzinResource
 from resources.manajemen_lembur import ManajemenLemburResource
 from resources.rekap_absensi import RekapAbsensiResource
+from resources.dashboard_kepegawaian import DashboardKepegawaianResource
 
 cors = CORS(allow_all_origins=True,
             allow_all_headers=True,
@@ -187,6 +188,7 @@ app.add_route('/api/manajemen-cuti', ManajemenCutiResource())
 app.add_route('/api/manajemen-izin', ManajemenIzinResource())
 app.add_route('/api/manajemen-lembur', ManajemenLemburResource())
 app.add_route('/api/rekap-absensi', RekapAbsensiResource())
+app.add_route('/api/dashboard-kepegawaian', DashboardKepegawaianResource())
 
 if __name__ == '__main__':
     from models.schema import *
